@@ -31,6 +31,7 @@ else
 fi
 
 expected=(qbittorrent prowlarr sonarr radarr bazarr jellyseerr flaresolverr jellyfin profilarr homarr recyclarr autobrr torrserver jackett qbit_manage aperture)
+expected+=(docker-socket-proxy gateway-lan gateway-tailscale uptime-kuma)
 if [[ "${ENABLE_NOTIFIARR:-0}" == 1 ]]; then
   expected+=(notifiarr)
 fi
@@ -43,29 +44,33 @@ for service in "${expected[@]}"; do
   state="$("${docker_cmd[@]}" inspect --format '{{.State.Status}}' "$cid" 2>/dev/null || true)"
   health="$("${docker_cmd[@]}" inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$cid" 2>/dev/null || true)"
   restarts="$("${docker_cmd[@]}" inspect --format '{{.RestartCount}}' "$cid" 2>/dev/null || printf 999)"
-  [[ "$state" == running ]] && pass "$service running" || fail "$service running (state=$state)"
-  [[ "$health" != unhealthy ]] && pass "$service health=$health" || fail "$service health=unhealthy"
-  [[ "$restarts" =~ ^[0-9]+$ && "$restarts" -lt 10 ]] && pass "$service restarts=$restarts" || fail "$service excessive restarts=$restarts"
+  if [[ "$state" == running ]]; then pass "$service running"; else fail "$service running (state=$state)"; fi
+  if [[ "$health" != unhealthy ]]; then pass "$service health=$health"; else fail "$service health=unhealthy"; fi
+  if [[ "$restarts" =~ ^[0-9]+$ && "$restarts" -lt 10 ]]; then pass "$service restarts=$restarts"; else fail "$service excessive restarts=$restarts"; fi
 done
 
 http_checks=(
   'qbittorrent|9090|/' 'prowlarr|9696|/' 'sonarr|8989|/' 'radarr|7878|/'
-  'bazarr|6767|/' 'jellyseerr|5055|/api/v1/status' 'flaresolverr|8191|/'
+  'bazarr|6767|/' 'jellyseerr|5055|/api/v1/status'
   'jellyfin|8096|/System/Info/Public' 'profilarr|6868|/' 'homarr|7575|/'
   'autobrr|7474|/' 'torrserver|18090|/'
-  'jackett|9117|/UI/Dashboard' 'aperture|3000|/'
+  'jackett|9117|/UI/Dashboard' 'aperture|3000|/' 'uptime-kuma|3001|/'
 )
 if [[ "${ENABLE_NOTIFIARR:-0}" == 1 ]]; then
   http_checks+=('notifiarr|5454|/')
 fi
-for spec in "${http_checks[@]}"; do
-  IFS='|' read -r name port path <<<"$spec"
-  code="$(curl -sS -o /dev/null --connect-timeout 2 --max-time 8 -w '%{http_code}' "http://127.0.0.1:${port}${path}" 2>/dev/null || true)"
-  if [[ "$code" =~ ^(200|204|301|302|401|403)$ ]]; then
-    pass "$name HTTP $code"
-  else
-    fail "$name HTTP ${code:-000}"
-  fi
+lan_ip="$(python3 -c 'import sys; lines=open(sys.argv[1]).read().splitlines(); print(next(line.split("=",1)[1] for line in lines if line.startswith("LAN_IP=")))' "$ENV_FILE")"
+tailscale_ip="$(python3 -c 'import sys; lines=open(sys.argv[1]).read().splitlines(); print(next(line.split("=",1)[1] for line in lines if line.startswith("TAILSCALE_IP=")))' "$ENV_FILE")"
+for access_ip in "$lan_ip" "$tailscale_ip"; do
+  for spec in "${http_checks[@]}"; do
+    IFS='|' read -r name port path <<<"$spec"
+    code="$(curl -sS -o /dev/null --connect-timeout 2 --max-time 8 -w '%{http_code}' "http://${access_ip}:${port}${path}" 2>/dev/null || true)"
+    if [[ "$code" =~ ^(200|204|301|302|307|401|403)$ ]]; then
+      pass "$name HTTP $code via $access_ip"
+    else
+      fail "$name HTTP ${code:-000} via $access_ip"
+    fi
+  done
 done
 
 if [[ "${RUN_DEEP_CHECKS:-0}" == 1 ]]; then
@@ -73,12 +78,24 @@ if [[ "${RUN_DEEP_CHECKS:-0}" == 1 ]]; then
   appdata_root="$(python3 -c 'import sys; lines=open(sys.argv[1]).read().splitlines(); print(next(line.split("=",1)[1] for line in lines if line.startswith("APPDATA_ROOT=")))' "$ENV_FILE")"
   for spec in "${app_health_checks[@]}"; do
     IFS='|' read -r service port api_version <<<"$spec"
-    if python3 -c 'import json,sys,urllib.request,xml.etree.ElementTree as ET; key=ET.parse(sys.argv[1]).getroot().findtext("ApiKey"); req=urllib.request.Request(sys.argv[2],headers={"X-Api-Key":key}); raise SystemExit(0 if json.load(urllib.request.urlopen(req,timeout=10)) == [] else 1)' "$appdata_root/$service/config.xml" "http://127.0.0.1:${port}/api/${api_version}/health" 2>/dev/null; then
+    if python3 -c 'import json,sys,urllib.request,xml.etree.ElementTree as ET; key=ET.parse(sys.argv[1]).getroot().findtext("ApiKey"); req=urllib.request.Request(sys.argv[2],headers={"X-Api-Key":key}); raise SystemExit(0 if json.load(urllib.request.urlopen(req,timeout=10)) == [] else 1)' "$appdata_root/$service/config.xml" "http://${lan_ip}:${port}/api/${api_version}/health" 2>/dev/null; then
       pass "$service application health"
     else
       fail "$service application health"
     fi
   done
+
+  if "${compose[@]}" exec -T flaresolverr curl -fsS http://localhost:8191/ >/dev/null 2>&1; then
+    pass "FlareSolverr internal health"
+  else
+    fail "FlareSolverr internal health"
+  fi
+
+  if "${compose[@]}" exec -T homarr wget -qO- http://docker-socket-proxy:2375/_ping >/dev/null 2>&1; then
+    pass "Homarr restricted Docker API"
+  else
+    fail "Homarr restricted Docker API"
+  fi
 
   if "${compose[@]}" exec -T recyclarr recyclarr sync --preview >/dev/null 2>&1; then
     pass "Recyclarr preview sync"
@@ -87,7 +104,7 @@ if [[ "${RUN_DEEP_CHECKS:-0}" == 1 ]]; then
   fi
 
   if qbm_output="$("${compose[@]}" exec -T qbit_manage sh -lc 'python3 qbit_manage.py --run --dry-run' 2>&1)"; then
-    [[ "$qbm_output" == *'Config Error:'* ]] && fail "qbit_manage configuration" || pass "qbit_manage configuration"
+    if [[ "$qbm_output" == *'Config Error:'* ]]; then fail "qbit_manage configuration"; else pass "qbit_manage configuration"; fi
   else
     fail "qbit_manage execution"
   fi

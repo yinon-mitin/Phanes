@@ -5,6 +5,8 @@
 ## Поток данных
 
 ```text
+LAN 10.0.0.88 --------> Caddy gateway-lan -------> HTTP-порты приложений
+Tailscale 100.77.77.77 -> Caddy gateway-tailscale -> HTTP-порты приложений
 Индексатор -> Prowlarr/Jackett -> Sonarr/Radarr -> qBittorrent
                                                -> MEDIA_ROOT
 Пользователь -> Jellyseerr -> Sonarr/Radarr     -> Jellyfin -> Клиент
@@ -12,6 +14,8 @@
 Bazarr ----------------------------------------> Субтитры
 Recyclarr -> Профили качества Sonarr/Radarr
 Homarr/Notifiarr -> Панель управления и уведомления
+Homarr -> ограниченный docker-socket-proxy -> read-only Docker API
+Uptime Kuma -> внутренние HTTP health-пробы
 ```
 
 ## Границы состояния
@@ -23,6 +27,8 @@ Homarr/Notifiarr -> Панель управления и уведомления
 | Локальные пути и секреты | `stack/.env` | Вне Git | Вручную или из secret manager |
 | Настройки приложений | `APPDATA_ROOT` | SQLite/XML/JSON | Из зашифрованного backup |
 | Медиатека | `MEDIA_ROOT` | Пользовательские файлы | Отдельная политика backup |
+| Мониторинг | Uptime Kuma и setup-скрипт | `APPDATA_ROOT/uptime-kuma` | Зашифрованный Restic backup |
+| Зашифрованный backup | Backup/restore-скрипты | Restic-репозиторий вне Git | Проверенное временное восстановление |
 
 ## Уровни проверки
 

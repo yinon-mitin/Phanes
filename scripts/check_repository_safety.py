@@ -35,7 +35,7 @@ TEXT_SECRET_RULES = {
     "AWS access key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     "hard-coded credential": re.compile(
         r"(?i)\b(?:password|passwd|api[_-]?key|auth\.token|secret(?:_encryption)?_key|jwt_secret)\b"
-        r"\s*[:=]\s*[\"']?(?!\$\{|<|replace-|put_|example|none|false|true)[^\s#\"']{8,}"
+        r"\s*[:=]\s*[\"']?(?!\$\{|<|replace-|put_|example|none|false|true|os\.environ)[^\s#\"']{8,}"
     ),
 }
 

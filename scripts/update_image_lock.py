@@ -28,6 +28,9 @@ SOURCES = {
     "JACKETT_IMAGE": "lscr.io/linuxserver/jackett:latest",
     "QBIT_MANAGE_IMAGE": "ghcr.io/stuffanthings/qbit_manage:latest",
     "APERTURE_IMAGE": "akhilmulpuri/aperture-web:latest",
+    "DOCKER_SOCKET_PROXY_IMAGE": "tecnativa/docker-socket-proxy:latest",
+    "UPTIME_KUMA_IMAGE": "louislam/uptime-kuma:2",
+    "CADDY_IMAGE": "caddy:2.10.2-alpine",
 }
 DIGEST_LINE = re.compile(r"^Digest:\s+(sha256:[0-9a-f]{64})$", re.MULTILINE)
 

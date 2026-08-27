@@ -11,19 +11,82 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+x-healthcheck: &default-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-gateway: &gateway
+  image: ${CADDY_IMAGE:?Load stack/versions.env}
+  volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  healthcheck:
+    <<: *default-healthcheck
+    test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2019/config/ >/dev/null || exit 1"]
+    start_period: 10s
+  read_only: true
+  tmpfs:
+    - /config
+    - /data
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+  logging: *default-logging
+
 services:
+  gateway-lan:
+    <<: *gateway
+    ports:
+      - "${LAN_IP:?Set LAN_IP in stack/.env}:3000:3000"
+      - "${LAN_IP}:3001:3001"
+      - "${LAN_IP}:5055:5055"
+      - "${LAN_IP}:5454:5454"
+      - "${LAN_IP}:6767:6767"
+      - "${LAN_IP}:6868:6868"
+      - "${LAN_IP}:7474:7474"
+      - "${LAN_IP}:7575:7575"
+      - "${LAN_IP}:7878:7878"
+      - "${LAN_IP}:8096:8096"
+      - "${LAN_IP}:8989:8989"
+      - "${LAN_IP}:9090:9090"
+      - "${LAN_IP}:9117:9117"
+      - "${LAN_IP}:9696:9696"
+      - "${LAN_IP}:18090:18090"
+
+  gateway-tailscale:
+    <<: *gateway
+    ports:
+      - "${TAILSCALE_IP:?Set TAILSCALE_IP in stack/.env}:3000:3000"
+      - "${TAILSCALE_IP}:3001:3001"
+      - "${TAILSCALE_IP}:5055:5055"
+      - "${TAILSCALE_IP}:5454:5454"
+      - "${TAILSCALE_IP}:6767:6767"
+      - "${TAILSCALE_IP}:6868:6868"
+      - "${TAILSCALE_IP}:7474:7474"
+      - "${TAILSCALE_IP}:7575:7575"
+      - "${TAILSCALE_IP}:7878:7878"
+      - "${TAILSCALE_IP}:8096:8096"
+      - "${TAILSCALE_IP}:8989:8989"
+      - "${TAILSCALE_IP}:9090:9090"
+      - "${TAILSCALE_IP}:9117:9117"
+      - "${TAILSCALE_IP}:9696:9696"
+      - "${TAILSCALE_IP}:18090:18090"
+
   qbittorrent:
     image: ${QBITTORRENT_IMAGE:?Load stack/versions.env}
     environment:
       <<: *linuxserver-environment
       WEBUI_PORT: 9090
     ports:
-      - "9090:9090"
-      - "6881:6881"
-      - "6881:6881/udp"
+      - "${LAN_IP:?Set LAN_IP in stack/.env}:6881:6881"
+      - "${LAN_IP}:6881:6881/udp"
     volumes:
       - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/qbittorrent:/config
       - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9090/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
@@ -32,70 +95,76 @@ services:
     environment:
       <<: *linuxserver-environment
       DOTNET_SYSTEM_NET_DISABLEIPV6: "1"
-    ports:
-      - "9696:9696"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/prowlarr:/config
+      - ${APPDATA_ROOT}/prowlarr:/config
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9696/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
   sonarr:
     image: ${SONARR_IMAGE:?Load stack/versions.env}
     environment: *linuxserver-environment
-    ports:
-      - "8989:8989"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/sonarr:/config
-      - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+      - ${APPDATA_ROOT}/sonarr:/config
+      - ${MEDIA_ROOT}:/media
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8989/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - prowlarr
-      - qbittorrent
+      prowlarr:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
 
   radarr:
     image: ${RADARR_IMAGE:?Load stack/versions.env}
     environment: *linuxserver-environment
-    ports:
-      - "7878:7878"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/radarr:/config
-      - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+      - ${APPDATA_ROOT}/radarr:/config
+      - ${MEDIA_ROOT}:/media
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:7878/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - prowlarr
-      - qbittorrent
+      prowlarr:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
 
   bazarr:
     image: ${BAZARR_IMAGE:?Load stack/versions.env}
     environment: *linuxserver-environment
-    ports:
-      - "6767:6767"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/bazarr:/config
-      - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+      - ${APPDATA_ROOT}/bazarr:/config
+      - ${MEDIA_ROOT}:/media
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:6767/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - sonarr
-      - radarr
+      sonarr:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
 
   jellyseerr:
     image: ${JELLYSEERR_IMAGE:?Load stack/versions.env}
     init: true
     environment:
       TZ: ${TZ:-UTC}
-    ports:
-      - "5055:5055"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/jellyseerr:/app/config
+      - ${APPDATA_ROOT}/jellyseerr:/app/config
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1"]
-      start_period: 20s
-      timeout: 3s
-      interval: 15s
-      retries: 3
+      start_period: 40s
     restart: unless-stopped
     logging: *default-logging
 
@@ -106,8 +175,9 @@ services:
       LOG_HTML: ${LOG_HTML:-false}
       CAPTCHA_SOLVER: ${CAPTCHA_SOLVER:-none}
       TZ: ${TZ:-UTC}
-    ports:
-      - "${FLARESOLVERR_PORT:-8191}:8191"
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8191/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
@@ -115,27 +185,57 @@ services:
     image: ${JELLYFIN_IMAGE:?Load stack/versions.env}
     environment: *linuxserver-environment
     ports:
-      - "8096:8096"
-      - "7359:7359/udp"
-      - "1900:1900/udp"
+      - "${LAN_IP}:7359:7359/udp"
+      - "${LAN_IP}:1900:1900/udp"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/jellyfin:/config
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/jellyfin-cache:/cache
+      - ${APPDATA_ROOT}/jellyfin:/config
+      - ${APPDATA_ROOT}/jellyfin-cache:/cache
       - ${JELLYFIN_AUX_CACHE:?Set JELLYFIN_AUX_CACHE in stack/.env}:/jellyfin-cache
-      - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+      - ${MEDIA_ROOT}:/media
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8096/System/Info/Public >/dev/null || exit 1"]
+      start_period: 60s
     restart: unless-stopped
     logging: *default-logging
 
   profilarr:
     image: ${PROFILARR_IMAGE:?Load stack/versions.env}
     environment:
-      TZ: ${TZ:-UTC}
-      PUID: ${PUID:-1000}
-      PGID: ${PGID:-1000}
-    ports:
-      - "6868:6868"
+      <<: *linuxserver-environment
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/profilarr:/config
+      - ${APPDATA_ROOT}/profilarr:/config
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6868/ >/dev/null || exit 1"]
+    restart: unless-stopped
+    logging: *default-logging
+
+  docker-socket-proxy:
+    image: ${DOCKER_SOCKET_PROXY_IMAGE:?Load stack/versions.env}
+    environment:
+      CONTAINERS: "1"
+      IMAGES: "1"
+      INFO: "1"
+      NETWORKS: "1"
+      SERVICES: "1"
+      TASKS: "1"
+      VERSION: "1"
+      POST: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker_api
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "test \"$(wget -qO- http://localhost:2375/_ping)\" = OK"]
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
     logging: *default-logging
 
@@ -143,35 +243,46 @@ services:
     image: ${HOMARR_IMAGE:?Load stack/versions.env}
     environment:
       SECRET_ENCRYPTION_KEY: ${HOMARR_SECRET_ENCRYPTION_KEY:?Set HOMARR_SECRET_ENCRYPTION_KEY in stack/.env}
-    ports:
-      - "7575:7575"
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/homarr:/appdata
+      - ${APPDATA_ROOT}/homarr:/appdata
+    networks:
+      - default
+      - docker_api
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7575/ >/dev/null || exit 1"]
+      start_period: 60s
     restart: unless-stopped
     logging: *default-logging
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
 
   recyclarr:
     image: ${RECYCLARR_IMAGE:?Load stack/versions.env}
     environment:
       TZ: ${TZ:-UTC}
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/recyclarr:/config
+      - ${APPDATA_ROOT}/recyclarr:/config
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - radarr
-      - sonarr
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
 
   notifiarr:
     image: ${NOTIFIARR_IMAGE:?Load stack/versions.env}
     profiles: ["notifiarr"]
     environment:
       TZ: ${TZ:-UTC}
-    ports:
-      - "5454:5454"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/notifiarr:/config
+      - ${APPDATA_ROOT}/notifiarr:/config
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5454/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
@@ -179,18 +290,19 @@ services:
     image: ${AUTOBRR_IMAGE:?Load stack/versions.env}
     environment:
       TZ: ${TZ:-UTC}
-    ports:
-      - "7474:7474"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/autobrr:/config
+      - ${APPDATA_ROOT}/autobrr:/config
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:7474/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - qbittorrent
+      qbittorrent:
+        condition: service_healthy
 
   torrserver:
     image: ${TORRSERVER_IMAGE:?Load stack/versions.env}
-    network_mode: host
     environment:
       TS_PORT: 18090
       TS_DONTKILL: "1"
@@ -198,8 +310,11 @@ services:
       TS_CONF_PATH: /opt/ts/config
       TS_TORR_DIR: /opt/ts/torrents
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/torrserver/config:/opt/ts/config
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/torrserver/cache:/opt/ts/torrents
+      - ${APPDATA_ROOT}/torrserver/config:/opt/ts/config
+      - ${APPDATA_ROOT}/torrserver/cache:/opt/ts/torrents
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "wget -qO- http://localhost:18090/ >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
@@ -208,11 +323,12 @@ services:
     environment:
       <<: *linuxserver-environment
       AUTO_UPDATE: "false"
-    ports:
-      - "9117:9117"
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/jackett:/config
+      - ${APPDATA_ROOT}/jackett:/config
       - ${DOWNLOADS_ROOT:?Set DOWNLOADS_ROOT in stack/.env}:/downloads
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9117/UI/Dashboard >/dev/null || exit 1"]
     restart: unless-stopped
     logging: *default-logging
 
@@ -221,27 +337,42 @@ services:
     environment:
       TZ: ${TZ:-UTC}
     volumes:
-      - ${APPDATA_ROOT:?Set APPDATA_ROOT in stack/.env}/qbit_manage:/config
-      - ${MEDIA_ROOT:?Set MEDIA_ROOT in stack/.env}:/media
+      - ${APPDATA_ROOT}/qbit_manage:/config
+      - ${MEDIA_ROOT}:/media
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - qbittorrent
+      qbittorrent:
+        condition: service_healthy
 
   aperture:
     image: ${APERTURE_IMAGE:?Load stack/versions.env}
     platform: linux/amd64
     environment:
-      DEFAULT_SERVER_URL: http://jellyfin:8096
-    ports:
-      - "3000:3000"
+      DEFAULT_SERVER_URL: http://${TAILSCALE_IP}:8096
     healthcheck:
+      <<: *default-healthcheck
       test: ["CMD-SHELL", "bun -e \"fetch('http://localhost:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
-      interval: 30s
-      timeout: 10s
-      retries: 3
       start_period: 40s
     restart: unless-stopped
     logging: *default-logging
     depends_on:
-      - jellyfin
+      jellyfin:
+        condition: service_healthy
+
+  uptime-kuma:
+    image: ${UPTIME_KUMA_IMAGE:?Load stack/versions.env}
+    environment:
+      UPTIME_KUMA_DB_TYPE: sqlite
+    volumes:
+      - ${APPDATA_ROOT}/uptime-kuma:/app/data
+    healthcheck:
+      <<: *default-healthcheck
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3001').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      start_period: 60s
+    restart: unless-stopped
+    logging: *default-logging
+
+networks:
+  docker_api:
+    internal: true

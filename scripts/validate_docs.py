@@ -17,6 +17,7 @@ PAIRS = {
     "docs/ARCHITECTURE.md": "docs/ru/ARCHITECTURE.md",
     "docs/REPRODUCIBILITY.md": "docs/ru/REPRODUCIBILITY.md",
     "docs/RESTORE.md": "docs/ru/RESTORE.md",
+    "docs/OPERATIONS.md": "docs/ru/OPERATIONS.md",
     "components/aperture.md": "components/aperture.ru.md",
 }
 MARKDOWN_LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+)(?:\s+[^)]*)?\)")

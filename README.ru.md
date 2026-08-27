@@ -13,7 +13,7 @@
 
 ## О проекте
 
-Репозиторий описывает медиаплатформу из 17 сервисов: версии контейнеров закреплены, конфигурация хоста отделена от кода, проверки автоматизированы, а восстановление документировано. Данные приложений и медиатека остаются вне Git.
+Репозиторий описывает медиаплатформу из 21 сервиса: версии контейнеров закреплены, доступ ограничен LAN/Tailscale gateway, добавлены мониторинг, зашифрованные backup, автоматические проверки и проверенное восстановление. Данные приложений и медиатека остаются вне Git.
 
 > [!IMPORTANT]
 > Репозиторий восстанавливает платформу, но не рабочие данные. Пользователи Jellyfin, история просмотров, API-ключи, торрент-состояние и метаданные библиотеки требуют отдельного зашифрованного backup `APPDATA_ROOT`.
@@ -25,11 +25,11 @@
 | Воспроизведение | Jellyfin, Aperture | `8096`, `3000` |
 | Запросы | Jellyseerr | `5055` |
 | Автоматизация библиотеки | Sonarr, Radarr, Bazarr, Recyclarr | `8989`, `7878`, `6767` |
-| Индексация и загрузка | Prowlarr, Jackett, FlareSolverr, qBittorrent | `9696`, `9117`, `8191`, `9090` |
+| Индексация и загрузка | Prowlarr, Jackett, внутренний FlareSolverr, qBittorrent | `9696`, `9117`, `9090` |
 | Дополнительная автоматизация | Autobrr, qbit_manage, TorrServer, Profilarr | `7474`, `18090`, `6868` |
-| Управление | Homarr, Notifiarr | `7575`, `5454` |
+| Управление | Homarr, Uptime Kuma, Caddy gateway, Docker socket proxy, Notifiarr | `7575`, `3001`, `5454` |
 
-По умолчанию запускаются 16 сервисов. Notifiarr вынесен в отдельный профиль, чтобы непривязанный клиент не создавал постоянные ошибки авторизации.
+По умолчанию запускаются 20 сервисов. Notifiarr вынесен в отдельный профиль, чтобы непривязанный клиент не создавал постоянные ошибки авторизации.
 
 ## Архитектура
 
@@ -77,7 +77,7 @@ make up
 make ps
 ```
 
-Jellyfin будет доступен на `http://localhost:8096`. Рекомендуемый порядок настройки приложений описан в [инструкции по восстановлению](docs/ru/RESTORE.md).
+Jellyfin доступен по `http://10.0.0.88:8096` в LAN и `http://100.77.77.77:8096` через Tailscale. Порты приложений публикуются только через привязанные к интерфейсам Caddy gateway. Подробности — в [руководстве по эксплуатации](docs/ru/OPERATIONS.md).
 
 ### Опциональный профиль Notifiarr
 
@@ -98,6 +98,9 @@ make down         Остановить сборку
 make ps           Показать контейнеры и их состояние
 make logs         Читать ротируемые Docker-логи
 make verify       Проверить контейнеры и HTTP endpoints
+make configure-monitoring  Создать мониторы Uptime Kuma
+make backup       Создать зашифрованный application-consistent Restic snapshot
+make verify-backup  Восстановить во временный каталог и проверить базы
 make update-lock  Получить новые immutable digest для исходных тегов
 ```
 
@@ -124,6 +127,7 @@ RUN_DEEP_CHECKS=1 RUN_EXTERNAL_CHECKS=1 make verify
 | Архитектура | [Архитектура](docs/ru/ARCHITECTURE.md) | [Architecture](docs/ARCHITECTURE.md) |
 | Воспроизводимость | [Воспроизводимость](docs/ru/REPRODUCIBILITY.md) | [Reproducibility](docs/REPRODUCIBILITY.md) |
 | Восстановление | [Восстановление](docs/ru/RESTORE.md) | [Restore](docs/RESTORE.md) |
+| Эксплуатация и backup | [Эксплуатация](docs/ru/OPERATIONS.md) | [Operations](docs/OPERATIONS.md) |
 | Участие | [Участие](CONTRIBUTING.ru.md) | [Contributing](CONTRIBUTING.md) |
 | Безопасность | [Безопасность](SECURITY.ru.md) | [Security](SECURITY.md) |
 | Контрибьюторы | [Контрибьюторы](CONTRIBUTORS.ru.md) | [Contributors](CONTRIBUTORS.md) |
