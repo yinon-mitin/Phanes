@@ -5,7 +5,6 @@
   [![English documentation](https://img.shields.io/badge/docs-English-0F766E?style=flat-square)](README.md)
   [![Документация на русском](https://img.shields.io/badge/docs-Русский-7C3AED?style=flat-square)](README.ru.md)
   [![MIT license](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
-  ![17 закреплённых образов](https://img.shields.io/badge/images-17_pinned-2563EB?style=flat-square)
 
   **Воспроизводимая Docker-сборка медиасервера на базе Jellyfin и *Arr-экосистемы.**
 
