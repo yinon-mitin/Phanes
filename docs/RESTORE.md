@@ -1,20 +1,22 @@
-# Восстановление
+# Restore and rollback
 
-## 1. Подготовка хоста
+[English](RESTORE.md) · [Русский](ru/RESTORE.md)
 
-Установите Git, Docker Engine/Desktop с Compose v2, `make` и Python 3. Проверьте доступность всех registry из `stack/versions.env`.
+## 1. Prepare the host
 
-## 2. Локальная конфигурация
+Install Git, Docker Engine/Desktop with Compose v2, Make, and Python 3. Confirm that the registries referenced by `stack/versions.env` are reachable.
+
+## 2. Configure local inputs
 
 ```sh
 make init
-# Отредактируйте stack/.env: абсолютные пути, UID/GID, timezone и новый Homarr key.
+# Edit stack/.env: absolute paths, UID/GID, timezone, and a new Homarr key.
 make test
 ```
 
-Не переносите старые ключи из Git history. `stack/.env` не должен попадать в repository.
+Do not reuse credentials from Git history. `stack/.env` must remain untracked.
 
-## 3. Чистый запуск
+## 3. Start from clean state
 
 ```sh
 make pull
@@ -22,29 +24,29 @@ make up
 make ps
 ```
 
-Откройте Jellyfin на `http://localhost:8096`, затем настройте сервисы в порядке:
+Configure applications in this order:
 
-1. qBittorrent;
-2. Prowlarr и/или Jackett;
-3. Sonarr и Radarr;
-4. Bazarr и Recyclarr;
-5. Jellyfin;
-6. Jellyseerr;
-7. Homarr, Notifiarr и остальные дополнения.
+1. qBittorrent
+2. Prowlarr and/or Jackett
+3. Sonarr and Radarr
+4. Bazarr and Recyclarr
+5. Jellyfin
+6. Jellyseerr and Aperture
+7. Homarr and optional services
 
-Используйте одинаковый container path `/media` во всех приложениях. Это снижает риск несовпадения путей при import и hardlink.
+Use `/media` consistently inside every container to avoid import and hardlink path mismatches.
 
-## 4. Восстановление состояния
+## 4. Restore application state
 
-Для полного восстановления остановите stack и восстановите зашифрованный snapshot `APPDATA_ROOT` в тот же абсолютный путь либо обновите `APPDATA_ROOT` в `.env`. Проверяйте ownership по `PUID`/`PGID` до запуска.
+Stop the stack, restore an encrypted `APPDATA_ROOT` snapshot, and verify ownership against `PUID` and `PGID` before startup.
 
 ```sh
 make up
 make verify
 ```
 
-SQLite-файлы нельзя надёжно копировать во время активной записи. Используйте built-in backup приложений или согласованный snapshot после остановки контейнеров.
+Do not copy active SQLite databases without a consistent filesystem snapshot. Prefer each application's backup function or stop the relevant containers first.
 
-## 5. Rollback
+## 5. Roll back
 
-Верните предыдущий Git revision, восстановите совместимый snapshot `APPDATA_ROOT` и снова выполните `make up`. Downgrade контейнера поверх базы, уже мигрированной новой версией, не считается безопасным rollback.
+Return to the previous Git revision and restore a compatible `APPDATA_ROOT` snapshot. Running an older container against a database migrated by a newer release is not a safe rollback.

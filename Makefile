@@ -5,7 +5,7 @@ VERSIONS_FILE ?= stack/versions.env
 COMPOSE_FILE ?= stack/docker-compose.yml
 COMPOSE = docker compose --env-file $(ENV_FILE) --env-file $(VERSIONS_FILE) -f $(COMPOSE_FILE)
 
-.PHONY: init validate config safety test pull up down restart ps logs verify update-lock notifiarr-up notifiarr-down
+.PHONY: init validate validate-docs config safety test pull up down restart ps logs verify update-lock notifiarr-up notifiarr-down
 
 init:
 	@test -f stack/.env || cp stack/.env.example stack/.env
@@ -15,13 +15,16 @@ validate:
 	@$(COMPOSE) config --quiet
 	@python3 scripts/validate_distribution.py --env-file $(ENV_FILE)
 
+validate-docs:
+	@python3 scripts/validate_docs.py
+
 config:
 	@$(COMPOSE) config
 
 safety:
 	@python3 scripts/check_repository_safety.py
 
-test: safety validate
+test: safety validate validate-docs
 	@git diff --check
 
 pull:

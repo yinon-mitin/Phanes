@@ -1,67 +1,44 @@
 <a id="top"></a>
 <div align="center">
-  <img src="assets/banner.svg" alt="Jellyfin Media Server Stack — reproducible, observable and private by default" width="100%">
-
-  <br>
+  <img src="assets/banner.svg" alt="Jellyfin Media Server Stack" width="100%">
 
   [![Validation](https://github.com/yinon-mitin/jellyfin-media-server-stack/actions/workflows/validate.yml/badge.svg)](https://github.com/yinon-mitin/jellyfin-media-server-stack/actions/workflows/validate.yml)
-  ![Docker Compose v2](https://img.shields.io/badge/Docker_Compose-v2-2496ED?style=flat-square&logo=docker&logoColor=white)
-  ![Images pinned](https://img.shields.io/badge/images-17_pinned-54D6C5?style=flat-square)
-  ![Platforms](https://img.shields.io/badge/platforms-amd64_%7C_arm64-7C5CFC?style=flat-square)
-  ![Private by default](https://img.shields.io/badge/posture-private_by_default-111827?style=flat-square)
+  [![English docs](https://img.shields.io/badge/docs-English-0F766E?style=flat-square)](README.md)
+  [![Документация на русском](https://img.shields.io/badge/docs-Русский-7C3AED?style=flat-square)](README.ru.md)
+  [![MIT license](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
+  ![17 pinned images](https://img.shields.io/badge/images-17_pinned-2563EB?style=flat-square)
+  ![amd64 and arm64](https://img.shields.io/badge/platforms-amd64_%7C_arm64-475569?style=flat-square)
 
-  **Воспроизводимая Docker-сборка домашнего медиасервера на базе Jellyfin и *Arr-экосистемы.**
+  **A reproducible Docker media stack built around Jellyfin and the *Arr ecosystem.**
 
-  [Быстрый старт](#-быстрый-старт) · [Архитектура](#-архитектура) · [Команды](#-команды) · [Восстановление](docs/RESTORE.md) · [Безопасность](SECURITY.md)
+  [Quick start](#quick-start) · [Architecture](#architecture) · [Operations](#operations) · [Restore guide](docs/RESTORE.md)
 </div>
 
----
+## Overview
 
-## Зачем эта сборка
-
-Обычный `docker-compose.yml` с тегами `latest` не является резервной копией: registry может отдать другой образ, локальные пути теряются, а секреты легко случайно отправить в Git. Этот репозиторий разделяет четыре типа состояния и проверяет их автоматически:
-
-| Контракт | Где хранится | Политика |
-| --- | --- | --- |
-| Топология сервисов | `stack/docker-compose.yml` | Git |
-| Версии OCI-образов | `stack/versions.env` | Git, только SHA-256 digest |
-| Пути и секреты | `stack/.env` | локально, вне Git |
-| Базы и медиатека | `APPDATA_ROOT`, `MEDIA_ROOT` | отдельный зашифрованный backup |
+This repository defines a 17-service media platform with immutable container images, portable host configuration, automated validation, and a documented restore path. Application state and media stay outside Git.
 
 > [!IMPORTANT]
-> Репозиторий воспроизводит платформу, но намеренно не содержит пользователей Jellyfin, историю просмотров, API-ключи, торрент-состояние, названия или файлы фильмов. Полное восстановление этих данных требует отдельного backup `APPDATA_ROOT`.
+> The repository recreates the platform, not its runtime data. Jellyfin users, watch history, API keys, torrent state, and library metadata require a separate encrypted backup of `APPDATA_ROOT`.
 
-## Содержание
+## Stack
 
-- [Возможности](#-возможности)
-- [Архитектура](#-архитектура)
-- [Состав](#-состав)
-- [Быстрый старт](#-быстрый-старт)
-- [Команды](#-команды)
-- [Воспроизводимость](#-воспроизводимость)
-- [Backup и восстановление](#-backup-и-восстановление)
-- [Структура репозитория](#-структура-репозитория)
-- [Безопасность](#-безопасность)
-- [Документация](#-документация)
-- [Участие в разработке](#-участие-в-разработке)
-- [Благодарности и товарные знаки](#-благодарности-и-товарные-знаки)
+| Layer | Services | Default ports |
+| --- | --- | --- |
+| Playback | Jellyfin, Aperture | `8096`, `3000` |
+| Requests | Jellyseerr | `5055` |
+| Library automation | Sonarr, Radarr, Bazarr, Recyclarr | `8989`, `7878`, `6767` |
+| Indexing and downloads | Prowlarr, Jackett, FlareSolverr, qBittorrent | `9696`, `9117`, `8191`, `9090` |
+| Automation | Autobrr, qbit_manage, TorrServer, Profilarr | `7474`, `18090`, `6868` |
+| Operations | Homarr, Notifiarr | `7575`, `5454` |
 
-## ✦ Возможности
+Sixteen services start by default. Notifiarr uses an optional profile so an unpaired client does not generate repeated authentication failures.
 
-- **Immutable deployments:** 17 образов закреплены digest, без `latest` в итоговом Compose.
-- **Cross-platform baseline:** основные сервисы проверены для `linux/amd64` и `linux/arm64`; Aperture явно запускается как `linux/amd64`.
-- **One-command quality gate:** `make test` проверяет Compose, image lock, секреты и запрещённые файлы.
-- **Clean-room restore:** локальные пути задаются одним `.env`, а порядок восстановления документирован.
-- **Controlled upgrades:** `make update-lock` обновляет digest только осознанно и оставляет reviewable diff.
-- **Runtime verification:** контейнеры, health, restarts и HTTP endpoints проверяются через `make verify`.
-- **Bounded logs:** Docker JSON logs ротируются по 3 файла × 10 MB.
-- **Private-data boundary:** базы, логи, media catalogue, torrents и credentials исключены строгим `.gitignore` и safety scanner.
-
-## ⬡ Архитектура
+## Architecture
 
 ```mermaid
 flowchart LR
-    U[Пользователь] --> A[Aperture]
+    U[User] --> A[Aperture]
     U --> JF[Jellyfin]
     U --> JS[Jellyseerr]
     A --> JF
@@ -79,35 +56,14 @@ flowchart LR
     RC[Recyclarr] --> S
     RC --> R
     H[Homarr] -. status .-> JF
-    N[Notifiarr] -. optional notifications .-> R
+    N[Notifiarr] -. optional .-> R
 ```
 
-Подробные потоки данных, state boundaries и уровни зрелости описаны в [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+The complete data-flow and state-ownership model is in [Architecture](docs/ARCHITECTURE.md).
 
-## ◈ Состав
+## Quick start
 
-| Слой | Сервисы | Порты по умолчанию |
-| --- | --- | --- |
-| Playback | Jellyfin, Aperture | `8096`, `3000` |
-| Requests | Jellyseerr | `5055` |
-| Library automation | Sonarr, Radarr, Bazarr, Recyclarr | `8989`, `7878`, `6767` |
-| Index and download | Prowlarr, Jackett, FlareSolverr, qBittorrent | `9696`, `9117`, `8191`, `9090` |
-| Automation extras | Autobrr, qbit_manage, TorrServer, Profilarr | `7474`, `18090`, `6868` |
-| Operations | Homarr, Notifiarr | `7575`, `5454` |
-
-По умолчанию запускаются 16 сервисов. Notifiarr находится в optional profile и включается после привязки API-клиента к аккаунту.
-
-## ▶ Быстрый старт
-
-### Требования
-
-- Git;
-- Docker Engine, Docker Desktop или OrbStack;
-- Docker Compose v2;
-- Make;
-- Python 3.
-
-### Установка
+Requirements: Git, Docker with Compose v2, Make, and Python 3.
 
 ```sh
 git clone https://github.com/yinon-mitin/jellyfin-media-server-stack.git
@@ -115,20 +71,7 @@ cd jellyfin-media-server-stack
 make init
 ```
 
-Отредактируйте созданный `stack/.env`:
-
-```dotenv
-TZ=Asia/Jerusalem
-PUID=1000
-PGID=1000
-APPDATA_ROOT=/absolute/path/to/docker/appdata
-MEDIA_ROOT=/absolute/path/to/media
-DOWNLOADS_ROOT=/absolute/path/to/downloads
-JELLYFIN_AUX_CACHE=/absolute/path/to/jellyfin-cache
-HOMARR_SECRET_ENCRYPTION_KEY=replace-with-openssl-rand-hex-32
-```
-
-Проверка и запуск:
+Edit `stack/.env` with absolute host paths, the runtime UID/GID, timezone, and a new Homarr key. Then run:
 
 ```sh
 make test
@@ -137,121 +80,66 @@ make up
 make ps
 ```
 
-Откройте:
+Open Jellyfin at `http://localhost:8096`. The recommended application setup order is documented in the [restore guide](docs/RESTORE.md).
 
-- Jellyfin: `http://localhost:8096`
-- Aperture: `http://localhost:3000`
-- Jellyseerr: `http://localhost:5055`
-- Homarr: `http://localhost:7575`
-
-Порядок первичной настройки сервисов приведён в [`docs/RESTORE.md`](docs/RESTORE.md).
-
-### Optional Notifiarr
-
-Notifiarr не запускается без profile, чтобы непривязанный клиент не создавал постоянные `401 Unauthorized`:
+### Optional Notifiarr profile
 
 ```sh
 COMPOSE_PROFILES=notifiarr make up
 ENABLE_NOTIFIARR=1 RUN_EXTERNAL_CHECKS=1 make verify
 ```
 
-## ⌘ Команды
+## Operations
 
-| Команда | Назначение |
-| --- | --- |
-| `make init` | создать локальный `stack/.env` |
-| `make test` | выполнить полный статический quality gate |
-| `make config` | показать разрешённую Compose-конфигурацию |
-| `make pull` | загрузить закреплённые OCI-образы |
-| `make up` | запустить или обновить stack |
-| `make down` | остановить stack |
-| `make ps` | показать контейнеры и health |
-| `make logs` | следить за ротируемыми логами |
-| `make verify` | проверить работающие сервисы и endpoints |
-| `make update-lock` | обновить immutable image digests |
+```text
+make init         Create stack/.env from the sanitized template
+make test         Run repository, image-lock, and Compose checks
+make config       Print the resolved Compose configuration
+make pull         Pull the pinned OCI images
+make up           Start or update the stack
+make down         Stop the stack
+make ps           Show container and health status
+make logs         Follow bounded Docker logs
+make verify       Check running containers and HTTP endpoints
+make update-lock  Resolve source tags to new immutable digests
+```
 
-Расширенная live-проверка:
+Deep runtime checks are opt-in:
 
 ```sh
 RUN_DEEP_CHECKS=1 RUN_EXTERNAL_CHECKS=1 make verify
 ```
 
-## ⛓ Воспроизводимость
+## Reproducibility
 
-`stack/versions.env` содержит ссылки только такого вида:
+- `stack/versions.env` pins every image as `repository@sha256:digest`.
+- `stack/.env` contains machine-specific paths and secrets and is ignored by Git.
+- `make test` rejects floating images, missing services, secrets, runtime files, and invalid Compose.
+- Image updates are explicit: run `make update-lock`, inspect the diff, and test against disposable state before production.
 
-```text
-repository/image@sha256:<immutable-digest>
-```
+See [Reproducibility](docs/REPRODUCIBILITY.md) for the exact contract and its limits.
 
-Обновления не происходят автоматически:
+## Documentation
 
-```sh
-make update-lock
-make test ENV_FILE=stack/.env.example
-git diff -- stack/versions.env
-```
+| Topic | English | Русский |
+| --- | --- | --- |
+| Project overview | [README](README.md) | [README](README.ru.md) |
+| Architecture | [Architecture](docs/ARCHITECTURE.md) | [Архитектура](docs/ru/ARCHITECTURE.md) |
+| Reproducibility | [Reproducibility](docs/REPRODUCIBILITY.md) | [Воспроизводимость](docs/ru/REPRODUCIBILITY.md) |
+| Restore and rollback | [Restore](docs/RESTORE.md) | [Восстановление](docs/ru/RESTORE.md) |
+| Contributing | [Contributing](CONTRIBUTING.md) | [Участие](CONTRIBUTING.ru.md) |
+| Security policy | [Security](SECURITY.md) | [Безопасность](SECURITY.ru.md) |
+| Contributors | [Contributors](CONTRIBUTORS.md) | [Контрибьюторы](CONTRIBUTORS.ru.md) |
+| Aperture component | [Component lock](components/aperture.md) | [Компонент](components/aperture.ru.md) |
 
-Новый digest необходимо проверить на временном `APPDATA_ROOT`, затем на копии production state. Подробнее: [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md).
+## Contributors
 
-## ↺ Backup и восстановление
+Maintained by [Yinon Mitin](https://github.com/yinon-mitin), with AI-assisted engineering and documentation. The participating model and tooling are listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
-1. Остановите приложения или используйте их built-in backup, чтобы получить согласованные SQLite-файлы.
-2. Зашифруйте snapshot `APPDATA_ROOT` на стороне клиента.
-3. Храните ключ отдельно от архива и GitHub.
-4. Проверяйте восстановление на отдельном каталоге и Docker project.
-5. Не выполняйте downgrade поверх базы, уже мигрированной новой версией.
+## License
 
-Полный runbook: [`docs/RESTORE.md`](docs/RESTORE.md).
+The repository code and original visual assets are available under the [MIT License](LICENSE). Bundled services and container images retain their own licenses.
 
-## ⌂ Структура репозитория
+Jellyfin is a trademark of the Jellyfin Project. This is an independent community distribution and is not affiliated with or endorsed by the Jellyfin Project. The repository logo is original and does not reproduce the official Jellyfin mark.
 
-```text
-.github/workflows/validate.yml   CI quality gate
-assets/logo.svg                  оригинальный знак проекта
-assets/banner.svg                README masthead
-stack/docker-compose.yml         topology и runtime contract
-stack/versions.env               immutable image lock
-stack/.env.example               sanitized local-input contract
-stack/verify-stack.sh            live verification
-scripts/                         safety, lock и distribution validators
-docs/                            architecture, reproducibility, restore
-frpc/frpc.example.toml           optional sanitized FRP template
-components/aperture.md            Aperture source revision и custom patch
-```
-
-## ◉ Безопасность
-
-Перед каждым push:
-
-```sh
-make safety
-git diff --cached
-```
-
-Никогда не коммитьте `.env`, `appdata`, базы, логи, API keys, server endpoints, torrent metadata, субтитры, media files или library exports. При утечке удаление следующими коммитом недостаточно: credential необходимо немедленно ротировать, а историю Git — переписать.
-
-Политика: [`SECURITY.md`](SECURITY.md).
-
-## ▤ Документация
-
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — потоки данных и state ownership;
-- [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) — immutable inputs и promotion rules;
-- [`docs/RESTORE.md`](docs/RESTORE.md) — clean install, restore и rollback;
-- [`components/aperture.md`](components/aperture.md) — upstream revision и custom image patch.
-
-## Участие в разработке
-
-Изменения принимаются через небольшие ветки и review. Требования к image updates, миграциям и проверкам описаны в [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## Благодарности и товарные знаки
-
-Структура README вдохновлена рекомендациями проекта [Awesome README](https://github.com/matiassingers/awesome-readme). Сборка использует независимые open-source проекты, которые распространяются под лицензиями их авторов.
-
-Jellyfin является товарным знаком Jellyfin Project. Этот репозиторий — независимая пользовательская сборка, не официальный продукт и не аффилирован с Jellyfin Project. Логотип репозитория оригинален и не воспроизводит официальный знак Jellyfin.
-
-<div align="center">
-  <sub>Infrastructure is code. Runtime data is not.</sub>
-  <br><br>
-  <a href="#top">Наверх ↑</a>
-</div>
+<div align="center"><a href="#top">Back to top</a></div>

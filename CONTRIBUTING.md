@@ -1,5 +1,7 @@
 # Contributing
 
+[English](CONTRIBUTING.md) · [Русский](CONTRIBUTING.ru.md)
+
 This repository is a private infrastructure distribution. Keep changes small, reviewable, and free of runtime data.
 
 ## Workflow

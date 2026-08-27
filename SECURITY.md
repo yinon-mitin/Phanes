@@ -1,5 +1,7 @@
 # Security policy
 
+[English](SECURITY.md) · [Русский](SECURITY.ru.md)
+
 ## Reporting
 
 Do not open an issue containing credentials, server addresses, media names, logs, database excerpts, or screenshots with private data. Report security findings privately to the repository owner through an agreed private channel.
