@@ -7,7 +7,7 @@ BACKUP_ENV_FILE ?= $(HOME)/.config/jellyfin-media-server/restic.env
 UPTIME_KUMA_ENV_FILE ?= $(HOME)/.config/jellyfin-media-server/uptime-kuma.env
 COMPOSE = docker compose --env-file $(ENV_FILE) --env-file $(VERSIONS_FILE) -f $(COMPOSE_FILE)
 
-.PHONY: init validate validate-docs validate-security validate-caddy config safety test pull up down restart ps logs verify configure-monitoring backup verify-backup update-lock notifiarr-up notifiarr-down
+.PHONY: init validate validate-docs validate-security validate-caddy config safety test pull up down restart ps logs verify watchdog configure-monitoring backup verify-backup update-lock notifiarr-up notifiarr-down
 
 init:
 	@test -f stack/.env || cp stack/.env.example stack/.env
@@ -55,6 +55,9 @@ logs:
 
 verify:
 	@ENV_FILE=$(ENV_FILE) VERSIONS_FILE=$(VERSIONS_FILE) stack/verify-stack.sh
+
+watchdog:
+	@ENV_FILE=$(ENV_FILE) VERSIONS_FILE=$(VERSIONS_FILE) python3 scripts/watchdog_stack.py
 
 configure-monitoring:
 	@set -a; . $(UPTIME_KUMA_ENV_FILE); set +a; uv run --with uptime-kuma-api==1.2.1 python3 scripts/configure_uptime_kuma.py

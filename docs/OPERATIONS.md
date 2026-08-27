@@ -61,6 +61,21 @@ Credentials live outside Git in:
 
 The configuration job creates HTTP monitors for all long-running web services. Add a notification provider in the Uptime Kuma UI if push alerts are required.
 
+The host watchdog complements Uptime Kuma by checking Docker/Compose state and
+the primary LAN/Tailscale endpoints. A healthy run is silent. On instability it
+performs bounded, non-upgrading recovery: restart failed services, reconcile the
+existing digest-pinned Compose deployment, then probe it again. Its stdout is a
+complete incident report suitable for a scheduler or notification gateway:
+
+```sh
+make watchdog
+```
+
+Run it every five minutes. Concurrent runs are locked, repeated unresolved
+incidents are deduplicated for one hour, and no image pull, data deletion, or
+configuration migration is attempted automatically. Set `WATCHDOG_DRY_RUN=1`
+to test detection without remediation.
+
 ## Encrypted backup
 
 The host uses a Restic repository on the external media volume. Configuration and password files stay outside Git:
