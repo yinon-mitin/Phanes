@@ -101,7 +101,7 @@ class SecurityContractTests(unittest.TestCase):
         self.assertEqual([], offenders)
 
     def test_only_gateways_and_lan_discovery_publish_ports(self) -> None:
-        allowed = {"gateway-lan", "gateway-tailscale", "qbittorrent", "jellyfin"}
+        allowed = {"gateway-lan", "gateway-tailscale", "qbittorrent", "jellyfin", "torrserver"}
         offenders = sorted(
             name
             for name, service in self.services.items()
@@ -113,6 +113,16 @@ class SecurityContractTests(unittest.TestCase):
         environment = self.services["docker-socket-proxy"].get("environment", {})
         self.assertEqual("0", environment.get("POST"))
         self.assertNotIn("ports", self.services["docker-socket-proxy"])
+
+    def test_torrserver_has_a_direct_lan_port_only(self) -> None:
+        ports = self.services["torrserver"].get("ports", [])
+        self.assertEqual(1, len(ports))
+        self.assertEqual(LOCAL_INPUTS["LAN_IP"], ports[0].get("host_ip"))
+        self.assertEqual(18090, int(ports[0].get("published")))
+        lan_gateway_ports = {int(port.get("published")) for port in self.services["gateway-lan"].get("ports", [])}
+        tailscale_gateway_ports = {int(port.get("published")) for port in self.services["gateway-tailscale"].get("ports", [])}
+        self.assertNotIn(18090, lan_gateway_ports)
+        self.assertIn(18090, tailscale_gateway_ports)
 
     def test_long_running_http_services_have_healthchecks(self) -> None:
         missing = sorted(

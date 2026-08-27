@@ -11,6 +11,8 @@ The stack publishes management HTTP ports only through two Caddy gateways:
 
 Application containers are not directly published. FlareSolverr and the Docker API proxy are internal-only. qBittorrent peer traffic and Jellyfin discovery remain LAN-only.
 
+TorrServer is the deliberate exception: Chromecast/NUM clients receive a direct LAN socket at `${LAN_IP}:18090`. Tailscale access to the same port remains behind the Tailscale Caddy gateway.
+
 Examples:
 
 ```text
@@ -20,6 +22,24 @@ Uptime Kuma  http://<LAN_IP>:3001     http://<TAILSCALE_IP>:3001
 ```
 
 Tailscale Serve on HTTPS port 443 is already owned by the Hermes dashboard and is intentionally not modified by this stack.
+
+## macOS firewall
+
+The repository contains a narrowly scoped PF anchor that only governs media-stack ports. It permits `${LAN_CIDR}` to `${LAN_IP}` and the Tailscale CGNAT range `100.64.0.0/10` to `${TAILSCALE_IP}`, then blocks other sources for those exact ports. It does not set a global deny policy and does not touch Screen Sharing, AirPlay, Hermes, OrbStack, virtual machines, or other unrelated listeners. qBittorrent peer port `6881` is intentionally excluded.
+
+Install it from an interactive macOS terminal with administrator authorization:
+
+```sh
+./scripts/install_macos_firewall.sh
+```
+
+The installer validates the complete PF configuration before loading it, creates `/etc/pf.conf.before-jellyfin-media-server`, enables the built-in macOS application firewall and stealth mode, and preserves automatic access for signed Apple/downloaded applications.
+
+Remove only this project's PF anchor with:
+
+```sh
+./scripts/uninstall_macos_firewall.sh
+```
 
 ## Docker API boundary
 
