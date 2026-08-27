@@ -10,7 +10,19 @@ ROOT = Path(__file__).resolve().parents[1]
 COMPOSE = ROOT / "stack/docker-compose.yml"
 ENV = ROOT / "stack/.env.example"
 VERSIONS = ROOT / "stack/versions.env"
-ALLOWED_BINDINGS = {"10.0.0.88", "100.77.77.77", "127.0.0.1"}
+
+
+def env_values(path: Path) -> dict[str, str]:
+    return {
+        key: value
+        for raw in path.read_text().splitlines()
+        if raw and not raw.startswith("#") and "=" in raw
+        for key, value in [raw.split("=", 1)]
+    }
+
+
+LOCAL_INPUTS = env_values(ENV)
+ALLOWED_BINDINGS = {LOCAL_INPUTS["LAN_IP"], LOCAL_INPUTS["TAILSCALE_IP"], "127.0.0.1"}
 HEALTHCHECK_REQUIRED = {
     "aperture",
     "autobrr",

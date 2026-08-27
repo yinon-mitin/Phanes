@@ -1,12 +1,12 @@
-# Architecture
+# Phanes architecture
 
 [English](ARCHITECTURE.md) · [Русский](ru/ARCHITECTURE.md)
 
 ## Data flow
 
 ```text
-LAN 10.0.0.88 --------> Caddy gateway-lan -------> application HTTP ports
-Tailscale 100.77.77.77 -> Caddy gateway-tailscale -> application HTTP ports
+LAN <LAN_IP> ------------> Caddy gateway-lan -------> application HTTP ports
+Tailscale <TAILSCALE_IP> -> Caddy gateway-tailscale -> application HTTP ports
 Indexer -> Prowlarr/Jackett -> Sonarr/Radarr -> qBittorrent
                                            -> MEDIA_ROOT
 User -> Jellyseerr -> Sonarr/Radarr         -> Jellyfin -> Client

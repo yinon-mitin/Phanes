@@ -1,4 +1,4 @@
-# Эксплуатация
+# Эксплуатация Phanes
 
 [English](../OPERATIONS.md) · [Русский](OPERATIONS.md)
 
@@ -6,17 +6,17 @@
 
 Управляющие HTTP-порты публикуются только через два Caddy gateway:
 
-- локальная сеть: `10.0.0.88`;
-- Tailscale: `100.77.77.77`.
+- локальная сеть: `<LAN_IP>`;
+- Tailscale: `<TAILSCALE_IP>`.
 
 Контейнеры приложений напрямую не публикуются. FlareSolverr и Docker API proxy доступны только внутри Docker. Peer-трафик qBittorrent и discovery Jellyfin остаются только в LAN.
 
 Примеры:
 
 ```text
-Jellyfin     http://10.0.0.88:8096     http://100.77.77.77:8096
-Homarr       http://10.0.0.88:7575     http://100.77.77.77:7575
-Uptime Kuma  http://10.0.0.88:3001     http://100.77.77.77:3001
+Jellyfin     http://<LAN_IP>:8096     http://<TAILSCALE_IP>:8096
+Homarr       http://<LAN_IP>:7575     http://<TAILSCALE_IP>:7575
+Uptime Kuma  http://<LAN_IP>:3001     http://<TAILSCALE_IP>:3001
 ```
 
 Tailscale Serve на HTTPS-порту 443 уже используется панелью Hermes и намеренно не изменяется этим стеком.

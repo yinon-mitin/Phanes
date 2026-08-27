@@ -1,20 +1,22 @@
 <a id="top"></a>
 <div align="center">
-  <img src="assets/banner.svg" alt="Jellyfin Media Server Stack" width="100%">
+  <img src="assets/banner.svg" alt="Phanes — Jellyfin Media Server Stack" width="100%">
 
   [![Validation](https://github.com/yinon-mitin/jellyfin-media-server-stack/actions/workflows/validate.yml/badge.svg)](https://github.com/yinon-mitin/jellyfin-media-server-stack/actions/workflows/validate.yml)
   [![English docs](https://img.shields.io/badge/docs-English-0F766E?style=flat-square)](README.md)
   [![Документация на русском](https://img.shields.io/badge/docs-Русский-7C3AED?style=flat-square)](README.ru.md)
   [![MIT license](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
 
-  **A reproducible Docker media stack built around Jellyfin and the *Arr ecosystem.**
+  **Phanes — a reproducible Docker media stack built around Jellyfin and the *Arr ecosystem.**
 
   [Quick start](#quick-start) · [Architecture](#architecture) · [Operations](#operations) · [Restore guide](docs/RESTORE.md)
 </div>
 
 ## Overview
 
-This repository defines a 21-service media platform with immutable container images, trusted LAN/Tailscale gateways, monitoring, encrypted backups, automated validation, and a tested restore path. Application state and media stay outside Git.
+**Phanes** is the project's code name, borrowed from the primordial figure in Orphic cosmogony whose name is associated with bringing to light and making visible. It fits a system that turns a private media collection into a coherent, accessible library.
+
+The repository defines a 21-service media platform with immutable container images, trusted LAN/Tailscale gateways, monitoring, encrypted backups, automated validation, and a tested restore path. Application state and media stay outside Git.
 
 > [!IMPORTANT]
 > The repository recreates the platform, not its runtime data. Jellyfin users, watch history, API keys, torrent state, and library metadata require a separate encrypted backup of `APPDATA_ROOT`.
@@ -78,7 +80,7 @@ make up
 make ps
 ```
 
-Open Jellyfin at `http://10.0.0.88:8096` on LAN or `http://100.77.77.77:8096` over Tailscale. Application ports are published only through interface-specific Caddy gateways. See the [operations guide](docs/OPERATIONS.md).
+Open Jellyfin at `http://<LAN_IP>:8096` on LAN or `http://<TAILSCALE_IP>:8096` over Tailscale. Application ports are published only through interface-specific Caddy gateways. See the [operations guide](docs/OPERATIONS.md).
 
 ### Optional Notifiarr profile
 

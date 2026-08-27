@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">Jellyfin Media Server Stack logo</title>
-  <desc id="desc">Three luminous server layers surrounding a play symbol.</desc>
+  <title id="title">Phanes logo</title>
+  <desc id="desc">Three luminous server layers surrounding a play symbol, representing a media library brought into the light.</desc>
   <defs>
     <linearGradient id="mark" x1="96" y1="72" x2="414" y2="438" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#54D6C5"/>
