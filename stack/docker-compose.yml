@@ -100,6 +100,9 @@ services:
     healthcheck:
       <<: *default-healthcheck
       test: ["CMD-SHELL", "curl -fsS http://localhost:9696/ >/dev/null || exit 1"]
+    depends_on:
+      flaresolverr:
+        condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
 
@@ -175,6 +178,7 @@ services:
       LOG_HTML: ${LOG_HTML:-false}
       CAPTCHA_SOLVER: ${CAPTCHA_SOLVER:-none}
       TZ: ${TZ:-UTC}
+    shm_size: 2gb
     healthcheck:
       <<: *default-healthcheck
       test: ["CMD-SHELL", "curl -fsS http://localhost:8191/ >/dev/null || exit 1"]
