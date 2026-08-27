@@ -25,4 +25,5 @@ If a secret is committed, removing the file in a later commit is insufficient. R
 - Review image-lock updates before deployment.
 - Back up application state before container upgrades.
 - Do not expose service ports directly to the public Internet without authentication, TLS, and an explicit network policy.
-- Treat the Docker socket mount used by Homarr as privileged host access.
+- Keep the Docker socket mounted only in `docker-socket-proxy`; Homarr must use the internal proxy with `POST=0` and no host-published proxy port.
+- Keep management HTTP ports bound only to the configured LAN and Tailscale interface gateways.

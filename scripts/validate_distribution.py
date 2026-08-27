@@ -14,9 +14,9 @@ COMPOSE_FILE = ROOT / "stack/docker-compose.yml"
 VERSIONS_FILE = ROOT / "stack/versions.env"
 DIGEST = re.compile(r"^[a-z0-9][a-z0-9./_-]*@sha256:[0-9a-f]{64}$")
 EXPECTED_SERVICES = {
-    "aperture", "autobrr", "bazarr", "flaresolverr", "homarr", "jackett", "jellyfin",
+    "aperture", "autobrr", "bazarr", "docker-socket-proxy", "flaresolverr", "gateway-lan", "gateway-tailscale", "homarr", "jackett", "jellyfin",
     "jellyseerr", "notifiarr", "profilarr", "prowlarr", "qbit_manage",
-    "qbittorrent", "radarr", "recyclarr", "sonarr", "torrserver",
+    "qbittorrent", "radarr", "recyclarr", "sonarr", "torrserver", "uptime-kuma",
 }
 
 

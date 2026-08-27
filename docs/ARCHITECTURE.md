@@ -5,6 +5,8 @@
 ## Data flow
 
 ```text
+LAN 10.0.0.88 --------> Caddy gateway-lan -------> application HTTP ports
+Tailscale 100.77.77.77 -> Caddy gateway-tailscale -> application HTTP ports
 Indexer -> Prowlarr/Jackett -> Sonarr/Radarr -> qBittorrent
                                            -> MEDIA_ROOT
 User -> Jellyseerr -> Sonarr/Radarr         -> Jellyfin -> Client
@@ -12,6 +14,8 @@ User -> Aperture ---------------------------> Jellyfin API
 Bazarr ------------------------------------> subtitles
 Recyclarr -> quality profiles in Sonarr/Radarr
 Homarr/Notifiarr -> dashboard and notifications
+Homarr -> restricted docker-socket-proxy -> Docker read-only APIs
+Uptime Kuma -> internal HTTP health probes
 ```
 
 ## State boundaries
@@ -23,6 +27,8 @@ Homarr/Notifiarr -> dashboard and notifications
 | Local paths and secrets | `stack/.env` | Outside Git | Manual or secret manager |
 | Application settings | `APPDATA_ROOT` | SQLite/XML/JSON | Encrypted backup |
 | Media library | `MEDIA_ROOT` | User files | Separate backup policy |
+| Monitoring | Uptime Kuma definition + setup script | `APPDATA_ROOT/uptime-kuma` | Encrypted Restic backup |
+| Encrypted backup | Backup/restore scripts | Restic repository outside Git | Tested temporary restore |
 
 ## Verification levels
 

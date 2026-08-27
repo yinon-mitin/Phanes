@@ -14,7 +14,7 @@
 
 ## Overview
 
-This repository defines a 17-service media platform with immutable container images, portable host configuration, automated validation, and a documented restore path. Application state and media stay outside Git.
+This repository defines a 21-service media platform with immutable container images, trusted LAN/Tailscale gateways, monitoring, encrypted backups, automated validation, and a tested restore path. Application state and media stay outside Git.
 
 > [!IMPORTANT]
 > The repository recreates the platform, not its runtime data. Jellyfin users, watch history, API keys, torrent state, and library metadata require a separate encrypted backup of `APPDATA_ROOT`.
@@ -26,11 +26,11 @@ This repository defines a 17-service media platform with immutable container ima
 | Playback | Jellyfin, Aperture | `8096`, `3000` |
 | Requests | Jellyseerr | `5055` |
 | Library automation | Sonarr, Radarr, Bazarr, Recyclarr | `8989`, `7878`, `6767` |
-| Indexing and downloads | Prowlarr, Jackett, FlareSolverr, qBittorrent | `9696`, `9117`, `8191`, `9090` |
+| Indexing and downloads | Prowlarr, Jackett, internal FlareSolverr, qBittorrent | `9696`, `9117`, `9090` |
 | Automation | Autobrr, qbit_manage, TorrServer, Profilarr | `7474`, `18090`, `6868` |
-| Operations | Homarr, Notifiarr | `7575`, `5454` |
+| Operations | Homarr, Uptime Kuma, Caddy gateways, Docker socket proxy, Notifiarr | `7575`, `3001`, `5454` |
 
-Sixteen services start by default. Notifiarr uses an optional profile so an unpaired client does not generate repeated authentication failures.
+Twenty services start by default. Notifiarr uses an optional profile so an unpaired client does not generate repeated authentication failures.
 
 ## Architecture
 
@@ -78,7 +78,7 @@ make up
 make ps
 ```
 
-Open Jellyfin at `http://localhost:8096`. The recommended application setup order is documented in the [restore guide](docs/RESTORE.md).
+Open Jellyfin at `http://10.0.0.88:8096` on LAN or `http://100.77.77.77:8096` over Tailscale. Application ports are published only through interface-specific Caddy gateways. See the [operations guide](docs/OPERATIONS.md).
 
 ### Optional Notifiarr profile
 
@@ -99,6 +99,9 @@ make down         Stop the stack
 make ps           Show container and health status
 make logs         Follow bounded Docker logs
 make verify       Check running containers and HTTP endpoints
+make configure-monitoring  Create Uptime Kuma monitors
+make backup       Create an encrypted application-consistent Restic snapshot
+make verify-backup  Restore to a temporary directory and check databases
 make update-lock  Resolve source tags to new immutable digests
 ```
 
@@ -125,6 +128,7 @@ See [Reproducibility](docs/REPRODUCIBILITY.md) for the exact contract and its li
 | Architecture | [Architecture](docs/ARCHITECTURE.md) | [Архитектура](docs/ru/ARCHITECTURE.md) |
 | Reproducibility | [Reproducibility](docs/REPRODUCIBILITY.md) | [Воспроизводимость](docs/ru/REPRODUCIBILITY.md) |
 | Restore and rollback | [Restore](docs/RESTORE.md) | [Восстановление](docs/ru/RESTORE.md) |
+| Operations and backup | [Operations](docs/OPERATIONS.md) | [Эксплуатация](docs/ru/OPERATIONS.md) |
 | Contributing | [Contributing](CONTRIBUTING.md) | [Участие](CONTRIBUTING.ru.md) |
 | Security policy | [Security](SECURITY.md) | [Безопасность](SECURITY.ru.md) |
 | Contributors | [Contributors](CONTRIBUTORS.md) | [Контрибьюторы](CONTRIBUTORS.ru.md) |
