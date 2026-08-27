@@ -1,26 +1,27 @@
-# Воспроизводимость
+# Reproducibility
 
-Релиз считается воспроизводимым, когда одинаковый Git revision и одинаковые локальные входы создают одну и ту же Compose-топологию и используют те же OCI image indexes.
+[English](REPRODUCIBILITY.md) · [Русский](ru/REPRODUCIBILITY.md)
 
-## Зафиксированные входы
+A release is reproducible when the same Git revision and local inputs produce the same Compose topology and OCI image references.
 
-- все 17 активных образов закреплены digest в `stack/versions.env`; 16 основных образов имеют amd64/arm64 manifests, а Aperture явно ограничен `linux/amd64`;
-- Compose не содержит `latest` и не выбирает версию самостоятельно;
-- локальные пути и секреты имеют явный контракт в `stack/.env.example`;
-- активный Aperture image закреплён digest; локальный checkout дополнительно закреплён Git revision и patch для самостоятельной сборки;
-- media catalogue и runtime databases не являются входом Git-сборки.
+## Pinned inputs
 
-## Проверка
+- All 17 images are pinned in `stack/versions.env`.
+- Sixteen images provide amd64 and arm64 manifests; Aperture is explicitly limited to `linux/amd64`.
+- Compose does not select floating versions.
+- `stack/.env.example` defines the machine-specific input contract without real secrets.
+- The active Aperture image is pinned by digest. Its optional source checkout is pinned by Git revision and patch.
+- Runtime databases and media catalogues are not Git inputs.
+
+## Validation
 
 ```sh
 make test ENV_FILE=stack/.env.example
 ```
 
-Проверка отклоняет floating image tags, отсутствующие image variables, незакреплённые digest, запрещённые runtime-файлы и некорректный Compose.
+The check rejects floating image references, missing image variables, unpinned digests, unexpected services, prohibited runtime files, and invalid Compose.
 
-## Обновление
-
-Обновления не происходят автоматически. Для осознанного обновления:
+## Updating images
 
 ```sh
 make update-lock
@@ -28,10 +29,10 @@ make test ENV_FILE=stack/.env.example
 git diff -- stack/versions.env
 ```
 
-После просмотра changelog каждого сервиса изменения следует проверить на временном `APPDATA_ROOT`, затем на копии production state. Новый digest меняет фактический артефакт даже при том же source tag.
+Review each upstream changelog. Test the new lock against disposable state, then against a copy of production state before rollout.
 
-## Ограничения
+## Limits
 
-Digest гарантирует неизменность образа, но не гарантирует идентичность CPU, kernel, Docker Engine, filesystem semantics или внешних API. Для production-релиза фиксируйте также версию Docker/Compose и проверяйте обе целевые архитектуры (`linux/amd64`, `linux/arm64`).
+A digest fixes an OCI artifact. It does not fix the CPU, kernel, Docker Engine, filesystem behavior, or external APIs. Production promotion should test the target architecture and record the Docker/Compose version.
 
-Jellyfin Intro Skipper Docker Mod исключён из базовой сборки: его registry endpoint не разрешил анонимно получить digest. Возвращать мод в baseline без immutable digest нельзя.
+The Jellyfin Intro Skipper Docker Mod is excluded because its registry did not allow anonymous digest resolution. It should not return to the baseline without an immutable reference.

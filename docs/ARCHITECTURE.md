@@ -1,6 +1,8 @@
-# Архитектура
+# Architecture
 
-## Поток данных
+[English](ARCHITECTURE.md) · [Русский](ru/ARCHITECTURE.md)
+
+## Data flow
 
 ```text
 Indexer -> Prowlarr/Jackett -> Sonarr/Radarr -> qBittorrent
@@ -12,21 +14,21 @@ Recyclarr -> quality profiles in Sonarr/Radarr
 Homarr/Notifiarr -> dashboard and notifications
 ```
 
-## Границы состояния
+## State boundaries
 
-| Слой | Desired state | Runtime state | Восстановление |
+| Layer | Desired state | Runtime state | Recovery |
 | --- | --- | --- | --- |
-| Контейнеры и сеть | `stack/docker-compose.yml` | Docker | пересоздаётся |
-| Версии образов | `stack/versions.env` | registry cache | пересоздаётся по digest |
-| Локальные пути/секреты | `stack/.env` | вне Git | вручную или из secret manager |
-| Настройки приложений | `APPDATA_ROOT` | SQLite/XML/JSON | только из зашифрованного backup |
-| Медиатека | `MEDIA_ROOT` | файлы пользователя | отдельная стратегия backup |
+| Containers and network | `stack/docker-compose.yml` | Docker | Recreated |
+| Image versions | `stack/versions.env` | Registry cache | Pulled by digest |
+| Local paths and secrets | `stack/.env` | Outside Git | Manual or secret manager |
+| Application settings | `APPDATA_ROOT` | SQLite/XML/JSON | Encrypted backup |
+| Media library | `MEDIA_ROOT` | User files | Separate backup policy |
 
-## Уровни зрелости
+## Verification levels
 
-- Реализовано: Compose-топология, immutable image lock, шаблон окружения, локальная и CI-валидация.
-- Локально проверяется: структура Compose, отсутствие floating tags и секретов.
-- Live-проверка: `make verify` на запущенном Docker host.
-- Не автоматизировано: первичная настройка UI, создание API-ключей и связей между приложениями.
+- Implemented: Compose topology, immutable image lock, environment template, local checks, and CI.
+- Locally verified: Compose structure, pinned images, repository safety, and documentation links.
+- Live verified: `make verify` against a running Docker host.
+- Manual: first-run UI setup, API-key exchange, and application pairing.
 
-Последний пункт принципиален: без backup `APPDATA_ROOT` репозиторий воспроизводит платформу, но не пользовательские аккаунты, историю и внутренние настройки приложений.
+Without an `APPDATA_ROOT` backup, the repository restores the platform but not users, history, queues, or application settings.

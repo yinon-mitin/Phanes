@@ -1,5 +1,7 @@
 # Aperture component lock
 
+[English](aperture.md) · [Русский](aperture.ru.md)
+
 Aperture is a third-party source checkout and is not vendored into this backup.
 
 - Upstream: https://github.com/akhilmulpurii/aperture.git
