@@ -52,7 +52,7 @@ services:
       - "${LAN_IP}:9090:9090"
       - "${LAN_IP}:9117:9117"
       - "${LAN_IP}:9696:9696"
-      - "${LAN_IP}:18090:18090"
+
 
   gateway-tailscale:
     <<: *gateway
@@ -309,6 +309,8 @@ services:
       TS_HTTPAUTH: "0"
       TS_CONF_PATH: /opt/ts/config
       TS_TORR_DIR: /opt/ts/torrents
+    ports:
+      - "${LAN_IP}:18090:18090"
     volumes:
       - ${APPDATA_ROOT}/torrserver/config:/opt/ts/config
       - ${APPDATA_ROOT}/torrserver/cache:/opt/ts/torrents

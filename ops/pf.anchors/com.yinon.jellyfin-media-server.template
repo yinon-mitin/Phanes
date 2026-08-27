@@ -1,0 +1,24 @@
+# Scoped policy for the Jellyfin media stack only.
+# Values are substituted from ignored stack/.env by install_macos_firewall.sh.
+# It does not change unrelated ports or services on this Mac.
+
+lan_ip = "__LAN_IP__"
+tailscale_ip = "__TAILSCALE_IP__"
+stack_tcp_ports = "{ 3000, 3001, 5055, 5454, 6767, 6868, 7474, 7575, 7878, 8096, 8989, 9090, 9117, 9696, 18090 }"
+stack_udp_ports = "{ 1900, 7359 }"
+
+table <jellyfin_lan_clients> const { __LAN_CIDR__ }
+table <jellyfin_tailnet_clients> const { 100.64.0.0/10 }
+
+pass in quick inet proto tcp from <jellyfin_lan_clients> to $lan_ip port $stack_tcp_ports keep state
+block in quick log inet proto tcp from any to $lan_ip port $stack_tcp_ports
+
+pass in quick inet proto tcp from <jellyfin_tailnet_clients> to $tailscale_ip port $stack_tcp_ports keep state
+block in quick log inet proto tcp from any to $tailscale_ip port $stack_tcp_ports
+
+pass in quick inet proto udp from <jellyfin_lan_clients> to $lan_ip port $stack_udp_ports keep state
+block in quick log inet proto udp from any to $lan_ip port $stack_udp_ports
+
+# qBittorrent peer port 6881 is intentionally outside this policy so router
+# port-forwarding and public peers continue to work according to qBittorrent's
+# own configuration.

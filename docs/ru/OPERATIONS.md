@@ -11,6 +11,8 @@
 
 Контейнеры приложений напрямую не публикуются. FlareSolverr и Docker API proxy доступны только внутри Docker. Peer-трафик qBittorrent и discovery Jellyfin остаются только в LAN.
 
+TorrServer — намеренное исключение: клиенты Chromecast/NUM получают прямой LAN socket `${LAN_IP}:18090`. Доступ через Tailscale к тому же порту остаётся за Tailscale Caddy gateway.
+
 Примеры:
 
 ```text
@@ -20,6 +22,24 @@ Uptime Kuma  http://<LAN_IP>:3001     http://<TAILSCALE_IP>:3001
 ```
 
 Tailscale Serve на HTTPS-порту 443 уже используется панелью Hermes и намеренно не изменяется этим стеком.
+
+## Firewall macOS
+
+В репозитории есть узкий PF anchor только для портов медиастека. Он разрешает `${LAN_CIDR}` доступ к `${LAN_IP}`, а Tailscale CGNAT `100.64.0.0/10` — к `${TAILSCALE_IP}`, после чего блокирует другие источники только для этих портов. Глобальный default deny не включается; Screen Sharing, AirPlay, Hermes, OrbStack, виртуальные машины и другие listeners не затрагиваются. Peer-порт qBittorrent `6881` намеренно исключён.
+
+Установка из интерактивного Terminal macOS с авторизацией администратора:
+
+```sh
+./scripts/install_macos_firewall.sh
+```
+
+Installer проверяет полную PF-конфигурацию до загрузки, сохраняет `/etc/pf.conf.before-jellyfin-media-server`, включает встроенный Application Firewall и stealth mode, сохраняя автоматический доступ для подписанных Apple/downloaded приложений.
+
+Удаление только PF anchor этого проекта:
+
+```sh
+./scripts/uninstall_macos_firewall.sh
+```
 
 ## Граница Docker API
 
