@@ -2,6 +2,7 @@
 """Fail if Git would publish runtime data, media indexes, or likely secrets."""
 from __future__ import annotations
 
+import ipaddress
 import re
 import subprocess
 import sys
@@ -38,6 +39,30 @@ TEXT_SECRET_RULES = {
         r"\s*[:=]\s*[\"']?(?!\$\{|<|replace-|put_|example|none|false|true|os\.environ)[^\s#\"']{8,}"
     ),
 }
+IPV4 = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
+DOCUMENTATION_NETWORKS = (
+    ipaddress.ip_network("192.0.2.0/24"),
+    ipaddress.ip_network("198.51.100.0/24"),
+    ipaddress.ip_network("203.0.113.0/24"),
+)
+CGNAT = ipaddress.ip_network("100.64.0.0/10")
+
+
+def contains_internal_address(line: str) -> bool:
+    for candidate in IPV4.findall(line):
+        try:
+            address = ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        if address.is_loopback or address.is_unspecified:
+            continue
+        if any(address in network for network in DOCUMENTATION_NETWORKS):
+            continue
+        if address == CGNAT.network_address:
+            continue
+        if address.is_private or address in CGNAT:
+            return True
+    return False
 
 
 def git_files() -> list[str]:
@@ -70,6 +95,8 @@ def main() -> int:
             continue
         text = raw.decode("utf-8", errors="ignore")
         for line_no, line in enumerate(text.splitlines(), 1):
+            if contains_internal_address(line):
+                findings.append((f"{rel}:{line_no}", "hard-coded private/internal IPv4 address"))
             if normalized.endswith(".example") or normalized.endswith(".example.toml"):
                 # Examples are still checked for real provider tokens/private keys,
                 # but placeholder credential assignments are allowed.

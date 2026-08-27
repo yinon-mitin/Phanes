@@ -1,17 +1,19 @@
 <a id="top"></a>
 <div align="center">
-  <img src="assets/banner.svg" alt="Jellyfin Media Server Stack" width="100%">
+  <img src="assets/banner.svg" alt="Phanes — Jellyfin Media Server Stack" width="100%">
 
   [![English documentation](https://img.shields.io/badge/docs-English-0F766E?style=flat-square)](README.md)
   [![Документация на русском](https://img.shields.io/badge/docs-Русский-7C3AED?style=flat-square)](README.ru.md)
   [![MIT license](https://img.shields.io/badge/license-MIT-111827?style=flat-square)](LICENSE)
 
-  **Воспроизводимая Docker-сборка медиасервера на базе Jellyfin и *Arr-экосистемы.**
+  **Phanes — воспроизводимая Docker-сборка медиасервера на базе Jellyfin и *Arr-экосистемы.**
 
   [Быстрый старт](#быстрый-старт) · [Архитектура](#архитектура) · [Управление](#управление) · [Восстановление](docs/ru/RESTORE.md)
 </div>
 
 ## О проекте
+
+**Phanes (Фанет)** — кодовое имя проекта в честь первородного божества орфической космогонии. Его имя связывают со значениями «выводящий на свет» и «делающий видимым». Это точно описывает систему, которая превращает частную коллекцию медиа в цельную и доступную библиотеку.
 
 Репозиторий описывает медиаплатформу из 21 сервиса: версии контейнеров закреплены, доступ ограничен LAN/Tailscale gateway, добавлены мониторинг, зашифрованные backup, автоматические проверки и проверенное восстановление. Данные приложений и медиатека остаются вне Git.
 
@@ -77,7 +79,7 @@ make up
 make ps
 ```
 
-Jellyfin доступен по `http://10.0.0.88:8096` в LAN и `http://100.77.77.77:8096` через Tailscale. Порты приложений публикуются только через привязанные к интерфейсам Caddy gateway. Подробности — в [руководстве по эксплуатации](docs/ru/OPERATIONS.md).
+Jellyfin доступен по `http://<LAN_IP>:8096` в LAN и `http://<TAILSCALE_IP>:8096` через Tailscale. Порты приложений публикуются только через привязанные к интерфейсам Caddy gateway. Подробности — в [руководстве по эксплуатации](docs/ru/OPERATIONS.md).
 
 ### Опциональный профиль Notifiarr
 

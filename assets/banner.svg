@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
-  <title id="title">Jellyfin Media Server Stack</title>
-  <desc id="desc">A reproducible, private-by-default Docker media platform.</desc>
+  <title id="title">Phanes — Jellyfin Media Server Stack</title>
+  <desc id="desc">Phanes is a reproducible, private-by-default Docker media platform.</desc>
   <defs>
     <linearGradient id="accent" x1="80" y1="55" x2="1060" y2="320" gradientUnits="userSpaceOnUse">
       <stop stop-color="#54D6C5"/>
@@ -25,15 +25,8 @@
     <path d="m232 190 78 66-78 66V190Z" fill="#F4F8FF" stroke="#F4F8FF" stroke-width="8" stroke-linejoin="round"/>
   </g>
   <g fill="#F5F8FF" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
-    <text x="375" y="139" font-size="54" font-weight="720" letter-spacing="-1.4">Jellyfin Media Server Stack</text>
-    <text x="378" y="192" fill="#A9B8CE" font-size="25" font-weight="450">Reproducible. Observable. Private by default.</text>
-  </g>
-  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="600">
-    <rect x="378" y="231" width="174" height="39" rx="19.5" fill="#17283A" stroke="#31526A"/>
-    <circle cx="402" cy="250.5" r="5" fill="#54D6C5"/>
-    <text x="417" y="256" fill="#C9D9E8">17 pinned images</text>
-    <rect x="566" y="231" width="156" height="39" rx="19.5" fill="#1B213C" stroke="#414B7D"/>
-    <circle cx="590" cy="250.5" r="5" fill="#8B75FF"/>
-    <text x="605" y="256" fill="#D6D2FF">amd64 + arm64</text>
+    <text x="375" y="128" font-size="76" font-weight="760" letter-spacing="-2">Phanes</text>
+    <text x="378" y="176" fill="#D6DFEC" font-size="25" font-weight="600">Jellyfin Media Server Stack</text>
+    <text x="378" y="220" fill="#8FA3BD" font-size="20" font-weight="450">Bringing your media library into the light.</text>
   </g>
 </svg>

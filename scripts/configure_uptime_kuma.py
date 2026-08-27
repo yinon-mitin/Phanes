@@ -21,7 +21,7 @@ def _websocket_connect(self: socketio.Client, *args: Any, **kwargs: Any) -> Any:
 
 socketio.Client.connect = _websocket_connect
 
-API_URL = os.environ.get("UPTIME_KUMA_URL", "http://10.0.0.88:3001")
+API_URL = os.environ.get("UPTIME_KUMA_URL", "http://127.0.0.1:3001")
 USERNAME = os.environ.get("UPTIME_KUMA_USERNAME")
 PASSWORD = os.environ.get("UPTIME_KUMA_PASSWORD")
 

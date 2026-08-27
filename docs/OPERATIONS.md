@@ -1,4 +1,4 @@
-# Operations
+# Phanes operations
 
 [English](OPERATIONS.md) · [Русский](ru/OPERATIONS.md)
 
@@ -6,17 +6,17 @@
 
 The stack publishes management HTTP ports only through two Caddy gateways:
 
-- LAN: `10.0.0.88`
-- Tailscale: `100.77.77.77`
+- LAN: `<LAN_IP>`
+- Tailscale: `<TAILSCALE_IP>`
 
 Application containers are not directly published. FlareSolverr and the Docker API proxy are internal-only. qBittorrent peer traffic and Jellyfin discovery remain LAN-only.
 
 Examples:
 
 ```text
-Jellyfin     http://10.0.0.88:8096     http://100.77.77.77:8096
-Homarr       http://10.0.0.88:7575     http://100.77.77.77:7575
-Uptime Kuma  http://10.0.0.88:3001     http://100.77.77.77:3001
+Jellyfin     http://<LAN_IP>:8096     http://<TAILSCALE_IP>:8096
+Homarr       http://<LAN_IP>:7575     http://<TAILSCALE_IP>:7575
+Uptime Kuma  http://<LAN_IP>:3001     http://<TAILSCALE_IP>:3001
 ```
 
 Tailscale Serve on HTTPS port 443 is already owned by the Hermes dashboard and is intentionally not modified by this stack.

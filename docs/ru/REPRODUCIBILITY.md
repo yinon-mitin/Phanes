@@ -1,4 +1,4 @@
-# Воспроизводимость
+# Воспроизводимость Phanes
 
 [English](../REPRODUCIBILITY.md) · [Русский](REPRODUCIBILITY.md)
 
