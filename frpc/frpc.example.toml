@@ -1,0 +1,17 @@
+# Copy to frpc.toml and fill in the real endpoint and token locally.
+# frpc.toml is intentionally ignored by Git.
+serverAddr = "frps.example.com"
+serverPort = 7000
+
+auth.method = "token"
+auth.token = "replace-with-frps-token"
+
+transport.tcpMux = true
+transport.poolCount = 0
+
+[[proxies]]
+name = "jellyfin"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 8096
+remotePort = 18096

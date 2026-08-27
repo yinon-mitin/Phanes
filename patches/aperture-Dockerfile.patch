@@ -1,0 +1,16 @@
+diff --git a/Dockerfile b/Dockerfile
+index d729ecd..ab06ced 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -46,2 +46,2 @@ COPY --from=builder /app/public ./public
+-# Expose port 3000
+-EXPOSE 3000
++# Expose port 3232
++EXPOSE 3232
+@@ -51 +51 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+-  CMD bun run -e "fetch('http://localhost:3000').then(() => process.exit(0)).catch(() => process.exit(1))" || exit 1
++  CMD bun run -e "fetch('http://localhost:3232').then(() => process.exit(0)).catch(() => process.exit(1))" || exit 1
+@@ -54 +54 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+-CMD ["bun", "run", "start"]
+\ No newline at end of file
++CMD ["bun", "run", "start"]

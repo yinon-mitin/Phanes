@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Jellyfin Media Server Stack logo</title>
+  <desc id="desc">Three luminous server layers surrounding a play symbol.</desc>
+  <defs>
+    <linearGradient id="mark" x1="96" y1="72" x2="414" y2="438" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#54D6C5"/>
+      <stop offset="1" stop-color="#7C5CFC"/>
+    </linearGradient>
+    <linearGradient id="surface" x1="102" y1="130" x2="404" y2="398" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#17253B"/>
+      <stop offset="1" stop-color="#0C1323"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#050812" flood-opacity=".42"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#090E1A"/>
+  <circle cx="256" cy="256" r="188" fill="#101A2C" stroke="#233552" stroke-width="2"/>
+  <g filter="url(#shadow)">
+    <path d="M112 158 256 83l144 75-144 75-144-75Z" fill="url(#surface)" stroke="url(#mark)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="m112 242 144-75 144 75-144 75-144-75Z" fill="url(#surface)" stroke="url(#mark)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="m112 326 144-75 144 75-144 75-144-75Z" fill="url(#surface)" stroke="url(#mark)" stroke-width="14" stroke-linejoin="round"/>
+  </g>
+  <path d="m232 190 78 66-78 66V190Z" fill="#F4F8FF" stroke="#F4F8FF" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="145" cy="326" r="7" fill="#54D6C5"/>
+  <circle cx="367" cy="326" r="7" fill="#7C5CFC"/>
+</svg>

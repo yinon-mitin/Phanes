@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">Jellyfin Media Server Stack</title>
+  <desc id="desc">A reproducible, private-by-default Docker media platform.</desc>
+  <defs>
+    <linearGradient id="accent" x1="80" y1="55" x2="1060" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#54D6C5"/>
+      <stop offset="1" stop-color="#7C5CFC"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101A2C"/>
+      <stop offset="1" stop-color="#090E1A"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#02040A" flood-opacity=".5"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="360" rx="32" fill="url(#panel)"/>
+  <path d="M0 298C234 250 365 337 585 300c246-42 375-157 615-104v164H0Z" fill="#121F35"/>
+  <path d="M0 315c229-41 374 26 587-8 251-40 382-139 613-93" fill="none" stroke="url(#accent)" stroke-opacity=".26" stroke-width="2"/>
+  <g transform="translate(74 58) scale(.48)" filter="url(#shadow)">
+    <circle cx="256" cy="256" r="188" fill="#0B1220" stroke="#263A59" stroke-width="3"/>
+    <path d="M112 158 256 83l144 75-144 75-144-75Z" fill="#142239" stroke="url(#accent)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="m112 242 144-75 144 75-144 75-144-75Z" fill="#111D31" stroke="url(#accent)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="m112 326 144-75 144 75-144 75-144-75Z" fill="#0E192B" stroke="url(#accent)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="m232 190 78 66-78 66V190Z" fill="#F4F8FF" stroke="#F4F8FF" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <g fill="#F5F8FF" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="375" y="139" font-size="54" font-weight="720" letter-spacing="-1.4">Jellyfin Media Server Stack</text>
+    <text x="378" y="192" fill="#A9B8CE" font-size="25" font-weight="450">Reproducible. Observable. Private by default.</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="600">
+    <rect x="378" y="231" width="174" height="39" rx="19.5" fill="#17283A" stroke="#31526A"/>
+    <circle cx="402" cy="250.5" r="5" fill="#54D6C5"/>
+    <text x="417" y="256" fill="#C9D9E8">17 pinned images</text>
+    <rect x="566" y="231" width="156" height="39" rx="19.5" fill="#1B213C" stroke="#414B7D"/>
+    <circle cx="590" cy="250.5" r="5" fill="#8B75FF"/>
+    <text x="605" y="256" fill="#D6D2FF">amd64 + arm64</text>
+  </g>
+</svg>

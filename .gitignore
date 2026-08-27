@@ -1,0 +1,113 @@
+# This repository stores reproducible infrastructure only.
+# Runtime state may contain credentials, user data and media catalogues.
+/appdata/
+/stack/homarr/appdata/
+
+# Local, third-party working tree. Its upstream revision and local patch are
+# recorded in components/ instead of vendoring a nested Git repository.
+/stack/aperture/
+
+# Secrets and machine-local environment
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials*.json
+secrets*.json
+
+# FRP runtime configuration contains an authentication token
+/frpc/frpc.toml
+
+# Databases, state, backups and logs
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.rdb
+*.wal
+*.pid
+*.log
+*.log.*
+logs/
+log/
+Backups/
+backups/
+backup/
+*.bak
+*.backup
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+
+# Torrent/download state and media catalogues
+*.torrent
+*.fastresume
+*.nzb
+*.m3u
+*.m3u8
+*.nfo
+*.srt
+*.ass
+*.ssa
+*.vtt
+movies.txt
+movies.csv
+movies.json
+films.txt
+films.csv
+films.json
+movie-list.*
+film-list.*
+media-list.*
+library-export.*
+
+# Media files
+*.mkv
+*.mp4
+*.avi
+*.mov
+*.m4v
+*.wmv
+*.flv
+*.webm
+*.mp3
+*.flac
+*.aac
+*.m4a
+*.wav
+*.iso
+
+# Generated/cache/dependency directories
+cache/
+Cache/
+.cache/
+node_modules/
+.next/
+dist/
+build/
+coverage/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS and editor files
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp
+*~
