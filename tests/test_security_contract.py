@@ -124,6 +124,11 @@ class SecurityContractTests(unittest.TestCase):
         self.assertNotIn(18090, lan_gateway_ports)
         self.assertIn(18090, tailscale_gateway_ports)
 
+    def test_prowlarr_waits_for_flaresolverr_on_cold_start(self) -> None:
+        dependency = self.services["prowlarr"].get("depends_on", {}).get("flaresolverr", {})
+        self.assertEqual("service_healthy", dependency.get("condition"))
+        self.assertEqual("2147483648", self.services["flaresolverr"].get("shm_size"))
+
     def test_long_running_http_services_have_healthchecks(self) -> None:
         missing = sorted(
             name

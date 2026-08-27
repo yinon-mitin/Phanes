@@ -23,6 +23,26 @@ Uptime Kuma  http://<LAN_IP>:3001     http://<TAILSCALE_IP>:3001
 
 Tailscale Serve on HTTPS port 443 is already owned by the Hermes dashboard and is intentionally not modified by this stack.
 
+## Container runtime: OrbStack
+
+The production Compose stack runs in Docker context `orbstack`. OrbStack starts at login and owns all active Phanes containers; Docker Desktop is stopped and retained only as a rollback source with its old containers stopped.
+
+Operational commands can select the runtime explicitly:
+
+```sh
+DOCKER_CONTEXT_NAME=orbstack RUN_DEEP_CHECKS=1 RUN_EXTERNAL_CHECKS=1 make verify
+DOCKER_CONTEXT=orbstack make backup
+```
+
+The migration reuses host bind mounts, so no application database or media data is copied into a Docker-managed volume. Pinned images are pulled independently into OrbStack. FlareSolverr receives a larger shared-memory allocation, and Prowlarr waits for FlareSolverr health to avoid cold-start proxy failures.
+
+Rollback procedure:
+
+1. Stop the stack in OrbStack.
+2. Start Docker Desktop.
+3. Start the existing stopped Compose containers with context `desktop-linux`.
+4. Do not run both stacks simultaneously against the shared `APPDATA_ROOT`.
+
 ## macOS firewall
 
 The repository contains a narrowly scoped PF anchor that only governs media-stack ports. It permits `${LAN_CIDR}` to `${LAN_IP}` and the Tailscale CGNAT range `100.64.0.0/10` to `${TAILSCALE_IP}`, then blocks other sources for those exact ports. It does not set a global deny policy and does not touch Screen Sharing, AirPlay, Hermes, OrbStack, virtual machines, or other unrelated listeners. qBittorrent peer port `6881` is intentionally excluded.
