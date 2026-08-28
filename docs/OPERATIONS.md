@@ -96,6 +96,58 @@ incidents are deduplicated for one hour, and no image pull, data deletion, or
 configuration migration is attempted automatically. Set `WATCHDOG_DRY_RUN=1`
 to test detection without remediation.
 
+## Sonarr/Radarr manual-interaction queue
+
+Persistent `Manual Interaction` notifications can be caused by completed
+qBittorrent items remaining in the active `sonarr` or `radarr` category after
+the library file is already present. The applications keep polling those
+categories and report the old download again as `importPending` or
+`importBlocked`.
+
+Audit first:
+
+```sh
+make arr-queue-audit
+```
+
+The reconciler is fail-closed: it only moves a completed Radarr warning when
+the corresponding movie has `hasFile=true`. It never deletes torrents or
+payload data. Apply the verified repair with:
+
+```sh
+make arr-queue-reconcile
+```
+
+The successful production repair configured `sonarr-imported` and
+`radarr-imported` as qBittorrent's post-import categories. Twenty-five stale
+Radarr torrents whose movies were already present were moved to
+`radarr-imported`. Two Sonarr items that did not represent importable episodes
+were preserved under `manual-review`. The active queues then reported zero
+manual-interaction warnings. Future successful imports leave the active
+category automatically and can continue seeding from the unchanged save path.
+
+## SDR-first media policy
+
+The current television is optimized for SDR playback. Automatic acquisition uses
+`RU 1080p SDR`; existing `RU 2160p SDR` and `RU 2160p SDR Fallback 1080p SDR`
+assignments remain SDR-compatible. HDR profiles are retained as future-ready
+profiles for a later display upgrade and are verified separately.
+
+The canonical policy is stored in `stack/media-policy.json`. Validate it with:
+
+```sh
+make validate-media-policy
+make verify-media-policy-live ENV_FILE=stack/.env
+```
+
+The live verifier is read-only and reports the distribution of Sonarr/Radarr
+items by quality profile. Current HDR assignment count is zero. Radarr currently
+has 40 items with the legacy `Unknown` profile; these are tracked for a reviewed,
+one-library-at-a-time assignment to the SDR production profile.
+
+The implementation plan is available at
+`.hermes/plans/2026-08-28_135500-sdr-first-media-policy.md`.
+
 ## Encrypted backup
 
 The host uses a Restic repository on the external media volume. Configuration and password files stay outside Git:
