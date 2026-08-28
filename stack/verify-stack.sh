@@ -53,7 +53,7 @@ http_checks=(
   'qbittorrent|9090|/' 'prowlarr|9696|/' 'sonarr|8989|/' 'radarr|7878|/'
   'bazarr|6767|/' 'jellyseerr|5055|/api/v1/status'
   'jellyfin|8096|/System/Info/Public' 'profilarr|6868|/' 'homarr|7575|/'
-  'autobrr|7474|/' 'torrserver|18090|/'
+  'autobrr|7474|/'
   'jackett|9117|/UI/Dashboard' 'aperture|3000|/' 'uptime-kuma|3001|/'
 )
 if [[ "${ENABLE_NOTIFIARR:-0}" == 1 ]]; then

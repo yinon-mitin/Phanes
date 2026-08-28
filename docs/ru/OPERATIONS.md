@@ -144,9 +144,9 @@ make verify-media-policy-live ENV_FILE=stack/.env
 ```
 
 Live verifier работает только на чтение и показывает распределение элементов
-Sonarr/Radarr по quality profile. Текущее число HDR-назначений равно нулю. В
-Radarr сейчас 40 элементов используют legacy-профиль `Unknown`; они отмечены для
-проверяемого назначения SDR-профиля по одной библиотеке за раз.
+Sonarr/Radarr по quality profile. Сейчас назначен один HDR-профиль: существующий HDR10-файл
+получил `RU 2160p HDR`. Legacy-профиль `Unknown` больше не назначен в Radarr.
+Миграция профилей завершена по всем 40 ранее затронутым элементам.
 
 План реализации находится в
 `.hermes/plans/2026-08-28_135500-sdr-first-media-policy.md`.
@@ -183,7 +183,7 @@ make test
 RUN_DEEP_CHECKS=1 RUN_EXTERNAL_CHECKS=1 make verify
 ```
 
-Live-gate проверяет пути через LAN и Tailscale, Docker health, restart count, состояние Arr-приложений, внутренний FlareSolverr, ограниченный Docker API для Homarr, Recyclarr, qbit_manage и внешний HTTPS Prowlarr.
+Live gate проверяет оба пути LAN и Tailscale для application gateways, Docker health, restart counts, Arr application health, внутреннюю доступность FlareSolverr, ограниченный Docker API Homarr, Recyclarr, qbit_manage и внешний HTTPS Prowlarr. TorrServer контролируется container healthcheck и используется через отдельный клиентский workflow.
 
 ## Восстановление
 

@@ -141,9 +141,7 @@ make verify-media-policy-live ENV_FILE=stack/.env
 ```
 
 The live verifier is read-only and reports the distribution of Sonarr/Radarr
-items by quality profile. Current HDR assignment count is zero. Radarr currently
-has 40 items with the legacy `Unknown` profile; these are tracked for a reviewed,
-one-library-at-a-time assignment to the SDR production profile.
+items by quality profile. Current HDR assignment count is one: the existing HDR10 file is assigned to `RU 2160p HDR`. The legacy `Unknown` profile is no longer assigned in Radarr.
 
 The implementation plan is available at
 `.hermes/plans/2026-08-28_135500-sdr-first-media-policy.md`.
@@ -180,7 +178,7 @@ make test
 RUN_DEEP_CHECKS=1 RUN_EXTERNAL_CHECKS=1 make verify
 ```
 
-The live gate checks both LAN and Tailscale paths, Docker health, restart counts, Arr application health, FlareSolverr internal reachability, restricted Homarr Docker API access, Recyclarr, qbit_manage, and external Prowlarr HTTPS.
+The live gate checks both LAN and Tailscale paths for the application gateways, Docker health, restart counts, Arr application health, FlareSolverr internal reachability, restricted Homarr Docker API access, Recyclarr, qbit_manage, and external Prowlarr HTTPS. TorrServer is covered by its container healthcheck and is operated through its dedicated client workflow.
 
 ## Recovery
 
