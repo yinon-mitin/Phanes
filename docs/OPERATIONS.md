@@ -129,8 +129,8 @@ category automatically and can continue seeding from the unchanged save path.
 ## SDR-first media policy
 
 The current television is optimized for SDR playback. Automatic acquisition uses
-`RU 1080p SDR`; existing `RU 2160p SDR` and `RU 2160p SDR Fallback 1080p SDR`
-assignments remain SDR-compatible. HDR profiles are retained as future-ready
+`RU 2160p SDR` with fallback to `RU 1080p SDR`; existing `RU 2160p SDR` and
+`RU 2160p SDR Fallback 1080p SDR` assignments remain SDR-compatible. HDR profiles are retained as future-ready
 profiles for a later display upgrade and are verified separately.
 
 The canonical policy is stored in `stack/media-policy.json`. Validate it with:

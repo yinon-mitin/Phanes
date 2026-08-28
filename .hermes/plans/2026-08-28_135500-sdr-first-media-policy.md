@@ -23,9 +23,9 @@ Live Sonarr and Radarr expose the following profiles:
 
 Live custom formats include SDR/HDR/DV signals and rejection formats for HDR DV HLG, AV1, AI, BR-DISK, low quality, and upscale content.
 
-Production requirement:
-
-- SDR profiles are active for current libraries and automatic downloads.
+- `RU 2160p SDR` is the active production profile for automatic acquisition.
+- `RU 1080p SDR` is the fallback when no suitable 2160p SDR release exists.
+- Existing `RU 2160p SDR` and `RU 2160p SDR Fallback 1080p SDR` assignments remain SDR-compatible.
 - HDR profiles remain future-ready and available for manual assignment.
 - HDR/DV releases receive a lower score or rejection under SDR profiles.
 - SDR fallback profiles remain available for future 4K SDR adoption.
