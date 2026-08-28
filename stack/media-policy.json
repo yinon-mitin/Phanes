@@ -1,8 +1,8 @@
 {
   "policy": "sdr-first",
   "active_production_profile": {
-    "sonarr": "RU 1080p SDR",
-    "radarr": "RU 1080p SDR"
+    "sonarr": "RU 2160p SDR",
+    "radarr": "RU 2160p SDR"
   },
   "future_profiles": {
     "sonarr": [
@@ -37,7 +37,7 @@
     ]
   },
   "rules": {
-    "automatic_acquisition": "active_production_profile_only",
+    "automatic_acquisition": "active_production_profile_with_sdr_fallback",
     "sdr_profile_must_prefer": ["RU SDR"],
     "sdr_profile_must_reject_or_deprioritize": ["RU HDR", "RU DV", "RU HDR ANY", "RU HDR10", "RU HDR10+"],
     "hdr_profiles": "manual_or_future_hardware",

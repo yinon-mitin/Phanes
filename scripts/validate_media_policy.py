@@ -18,8 +18,8 @@ def validate(data: dict) -> list[str]:
     formats = data.get("required_custom_formats", {})
     for app in APPS:
         profile = active.get(app)
-        if not isinstance(profile, str) or "SDR" not in profile or "HDR" in profile:
-            errors.append(f"{app}: active production profile must be SDR-only")
+        if not isinstance(profile, str) or profile != "RU 2160p SDR":
+            errors.append(f"{app}: active production profile must be RU 2160p SDR")
         future_profiles = future.get(app)
         if not isinstance(future_profiles, list) or len(future_profiles) != len(set(future_profiles)):
             errors.append(f"{app}: future profiles must be a unique list")
@@ -30,8 +30,8 @@ def validate(data: dict) -> list[str]:
             if name not in required:
                 errors.append(f"{app}: missing required custom format {name}")
     rules = data.get("rules", {})
-    if rules.get("automatic_acquisition") != "active_production_profile_only":
-        errors.append("automatic acquisition must use the active production profile only")
+    if rules.get("automatic_acquisition") != "active_production_profile_with_sdr_fallback":
+        errors.append("automatic acquisition must use RU 2160p SDR with an SDR fallback")
     if rules.get("hdr_profiles") != "manual_or_future_hardware":
         errors.append("HDR profiles must remain manual/future-hardware profiles")
     return errors

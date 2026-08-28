@@ -20,7 +20,7 @@ class MediaPolicyTests(unittest.TestCase):
     def test_active_profiles_are_sdr_and_future_profiles_include_hdr(self) -> None:
         data = json.loads(POLICY.read_text())
         for app, profile in data["active_production_profile"].items():
-            self.assertIn("SDR", profile)
+            self.assertEqual("RU 2160p SDR", profile)
             self.assertNotIn("HDR", profile)
             self.assertTrue(data["future_profiles"][app])
             self.assertTrue(all("HDR" in value or "SDR" in value for value in data["future_profiles"][app]))
