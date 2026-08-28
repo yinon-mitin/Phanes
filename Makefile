@@ -7,7 +7,7 @@ BACKUP_ENV_FILE ?= $(HOME)/.config/jellyfin-media-server/restic.env
 UPTIME_KUMA_ENV_FILE ?= $(HOME)/.config/jellyfin-media-server/uptime-kuma.env
 COMPOSE = docker compose --env-file $(ENV_FILE) --env-file $(VERSIONS_FILE) -f $(COMPOSE_FILE)
 
-.PHONY: init validate validate-docs validate-security validate-caddy config safety test pull up down restart ps logs verify watchdog configure-monitoring backup verify-backup update-lock notifiarr-up notifiarr-down
+.PHONY: init validate validate-docs validate-security validate-caddy validate-media-policy verify-media-policy-live config safety test pull up down restart ps logs verify watchdog arr-queue-audit arr-queue-reconcile configure-monitoring backup verify-backup update-lock notifiarr-up notifiarr-down
 
 init:
 	@test -f stack/.env || cp stack/.env.example stack/.env
@@ -26,13 +26,19 @@ validate-security:
 validate-caddy:
 	@docker run --rm -v "$(CURDIR)/stack/Caddyfile:/etc/caddy/Caddyfile:ro" $$(grep '^CADDY_IMAGE=' $(VERSIONS_FILE) | cut -d= -f2-) caddy validate --config /etc/caddy/Caddyfile
 
+validate-media-policy:
+	@python3 scripts/validate_media_policy.py
+
+verify-media-policy-live:
+	@python3 scripts/verify_media_policy_live.py
+
 config:
 	@$(COMPOSE) config
 
 safety:
 	@python3 scripts/check_repository_safety.py
 
-test: safety validate validate-docs validate-security validate-caddy
+test: safety validate validate-docs validate-security validate-caddy validate-media-policy
 	@git diff --check
 
 pull:
@@ -58,6 +64,12 @@ verify:
 
 watchdog:
 	@ENV_FILE=$(ENV_FILE) VERSIONS_FILE=$(VERSIONS_FILE) python3 scripts/watchdog_stack.py
+
+arr-queue-audit:
+	@python3 scripts/reconcile_arr_queue.py
+
+arr-queue-reconcile:
+	@python3 scripts/reconcile_arr_queue.py --apply --quarantine-sonarr-warnings
 
 configure-monitoring:
 	@set -a; . $(UPTIME_KUMA_ENV_FILE); set +a; uv run --with uptime-kuma-api==1.2.1 python3 scripts/configure_uptime_kuma.py

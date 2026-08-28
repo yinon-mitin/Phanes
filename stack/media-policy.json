@@ -1,0 +1,46 @@
+{
+  "policy": "sdr-first",
+  "active_production_profile": {
+    "sonarr": "RU 1080p SDR",
+    "radarr": "RU 1080p SDR"
+  },
+  "future_profiles": {
+    "sonarr": [
+      "RU 2160p SDR",
+      "RU 1080p HDR",
+      "RU 2160p HDR",
+      "RU 2160p SDR Fallback 1080p SDR",
+      "RU 2160p HDR Fallback 1080p HDR"
+    ],
+    "radarr": [
+      "RU 2160p SDR",
+      "RU 1080p HDR",
+      "RU 2160p HDR",
+      "RU 2160p SDR Fallback 1080p SDR",
+      "RU 2160p HDR Fallback 1080p HDR"
+    ]
+  },
+  "required_custom_formats": {
+    "sonarr": [
+      "RU SDR",
+      "RU HDR",
+      "RU DV",
+      "RU Reject HDR DV HLG",
+      "RU Reject AV1"
+    ],
+    "radarr": [
+      "RU SDR",
+      "RU HDR",
+      "RU DV",
+      "RU Reject HDR DV HLG",
+      "RU Reject AV1"
+    ]
+  },
+  "rules": {
+    "automatic_acquisition": "active_production_profile_only",
+    "sdr_profile_must_prefer": ["RU SDR"],
+    "sdr_profile_must_reject_or_deprioritize": ["RU HDR", "RU DV", "RU HDR ANY", "RU HDR10", "RU HDR10+"],
+    "hdr_profiles": "manual_or_future_hardware",
+    "library_mutation": "manual_review_required"
+  }
+}
