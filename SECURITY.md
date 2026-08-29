@@ -21,7 +21,7 @@ If a secret is committed, removing the file in a later commit is insufficient. R
 
 ## Deployment
 
-- Keep the GitHub repository private.
+- Keep runtime state, credentials, and sensitive infrastructure details private; the repository itself is public.
 - Review image-lock updates before deployment.
 - Back up application state before container upgrades.
 - Do not expose service ports directly to the public Internet without authentication, TLS, and an explicit network policy.
